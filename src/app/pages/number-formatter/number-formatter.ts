@@ -25,25 +25,31 @@ function groupToWords(n: number): string {
   return result;
 }
 
-function formatWithCommas(input: string): string {
+function intToCommas(intStr: string): string {
   const result: string[] = [];
   let count = 0;
-  for (let i = input.length - 1; i >= 0; i--) {
+  for (let i = intStr.length - 1; i >= 0; i--) {
     if (count > 0 && count % 3 === 0) result.unshift(',');
-    result.unshift(input[i]);
+    result.unshift(intStr[i]);
     count++;
   }
   return result.join('');
 }
 
-function numberToWords(input: string): string {
-  if (input === '0') return 'Zero';
+function formatWithCommas(input: string): string {
+  const [intPart, decPart] = input.split('.');
+  const commaInt = intToCommas(intPart);
+  return decPart !== undefined ? commaInt + '.' + decPart : commaInt;
+}
+
+function intPartToWords(intStr: string): string {
+  if (intStr === '0') return 'zero';
   const groups: number[] = [];
-  for (let i = input.length; i > 0; i -= 3) {
+  for (let i = intStr.length; i > 0; i -= 3) {
     const start = Math.max(0, i - 3);
-    groups.push(parseInt(input.slice(start, i), 10));
+    groups.push(parseInt(intStr.slice(start, i), 10));
   }
-  let parts: string[] = [];
+  const parts: string[] = [];
   for (let i = groups.length - 1; i >= 0; i--) {
     const g = groups[i];
     if (g === 0) continue;
@@ -57,7 +63,16 @@ function numberToWords(input: string): string {
       parts.push(words);
     }
   }
-  const result = parts.join(', ');
+  return parts.join(', ');
+}
+
+function numberToWords(input: string): string {
+  const [intStr, decStr] = input.split('.');
+  const intWords = intPartToWords(intStr);
+  const decPart = decStr
+    ? ' point ' + decStr.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    : '';
+  const result = intWords + decPart;
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
@@ -163,18 +178,19 @@ export class NumberFormatter {
       return;
     }
     const stripped = trimmed.replace(/,/g, '');
-    if (!/^\d+$/.test(stripped)) {
-      this.error.set('Only digits and commas allowed.');
+    if (!/^\d+(\.\d*)?$/.test(stripped)) {
+      this.error.set('Only digits, commas, and one decimal point allowed.');
       this.input.set(trimmed);
       return;
     }
-    if (stripped.length > 1 && stripped[0] === '0') {
+    const [intPart] = stripped.split('.');
+    if (intPart.length > 1 && intPart[0] === '0') {
       this.error.set('No leading zeros.');
       this.input.set(trimmed);
       return;
     }
-    if (stripped.length > 24) {
-      this.error.set('Number too large (max 24 digits).');
+    if (intPart.length > 24) {
+      this.error.set('Integer part too large (max 24 digits).');
       this.input.set(trimmed);
       return;
     }
