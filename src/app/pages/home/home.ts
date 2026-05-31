@@ -34,5 +34,10 @@ export class Home {
       description: 'Generate a random 12-character alphanumeric string.',
       route: '/username-generator',
     },
+    {
+      name: 'Number Formatter',
+      description: 'Format a number with comma separators and convert it to English words.',
+      route: '/number-formatter',
+    },
   ];
 }
