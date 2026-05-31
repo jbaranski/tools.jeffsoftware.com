@@ -26,22 +26,38 @@ function threeDigitsToWords(n: number): string {
 }
 
 function numberToWords(n: number): string {
-  const int = Math.floor(Math.abs(n));
-  if (int === 0) return 'zero';
+  const abs = Math.abs(n);
+  const int = Math.floor(abs);
   const prefix = n < 0 ? 'negative ' : '';
-  const chunks: number[] = [];
-  let remaining = int;
-  while (remaining > 0) {
-    chunks.push(remaining % 1000);
-    remaining = Math.floor(remaining / 1000);
+
+  let intWords: string;
+  if (int === 0) {
+    intWords = 'zero';
+  } else {
+    const chunks: number[] = [];
+    let remaining = int;
+    while (remaining > 0) {
+      chunks.push(remaining % 1000);
+      remaining = Math.floor(remaining / 1000);
+    }
+    const parts: string[] = [];
+    for (let i = chunks.length - 1; i >= 0; i--) {
+      if (chunks[i] === 0) continue;
+      const words = threeDigitsToWords(chunks[i]);
+      parts.push(SCALE[i] ? words + ' ' + SCALE[i] : words);
+    }
+    intWords = parts.join(', ');
   }
-  const parts: string[] = [];
-  for (let i = chunks.length - 1; i >= 0; i--) {
-    if (chunks[i] === 0) continue;
-    const words = threeDigitsToWords(chunks[i]);
-    parts.push(SCALE[i] ? words + ' ' + SCALE[i] : words);
-  }
-  return prefix + parts.join(', ');
+
+  // Use toFixed(2) to match formatNumber's rounding, then strip trailing zeros
+  const str = parseFloat(abs.toFixed(2)).toString();
+  const dotIdx = str.indexOf('.');
+  const decDigits = dotIdx >= 0 ? str.slice(dotIdx + 1) : '';
+  const decPart = decDigits
+    ? ' point ' + decDigits.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    : '';
+
+  return prefix + intWords + decPart;
 }
 
 function formatNumber(n: number): string {
@@ -216,7 +232,7 @@ export class TpsCalculator {
   }
 
   async copyAll(): Promise<void> {
-    const text = this.rows().map(r => `${r.label}: ${r.formatted}`).join('\n');
+    const text = this.rows().map(r => `${r.label}: ${r.formatted} (${r.words})`).join('\n');
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
