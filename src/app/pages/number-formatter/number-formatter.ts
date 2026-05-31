@@ -92,37 +92,53 @@ interface FormatterResult {
         }
       </div>
 
-      <div class="space-y-3">
-        <div class="border border-gray-200 rounded-lg p-4">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-xs font-medium text-gray-500">Plain</p>
-            <button
-              (click)="copyField('plain')"
-              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-            >{{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}</button>
-          </div>
-          <p class="font-mono text-lg text-gray-800 select-all break-all">{{ result()?.plain ?? '' }}</p>
-        </div>
-        <div class="border border-gray-200 rounded-lg p-4">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-xs font-medium text-gray-500">With commas</p>
-            <button
-              (click)="copyField('commas')"
-              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-            >{{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}</button>
-          </div>
-          <p class="font-mono text-lg text-gray-800 select-all break-all">{{ result()?.commas ?? '' }}</p>
-        </div>
-        <div class="border border-gray-200 rounded-lg p-4">
-          <div class="flex items-center justify-between mb-1">
-            <p class="text-xs font-medium text-gray-500">In words</p>
-            <button
-              (click)="copyField('words')"
-              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-            >{{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}</button>
-          </div>
-          <p class="text-lg text-gray-800 select-all break-words">{{ result()?.words ?? '' }}</p>
-        </div>
+      <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 w-32">Format</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600">Value</th>
+              <th class="px-4 py-3 w-24">
+                <button
+                  (click)="copyAll()"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors float-right"
+                >{{ copiedAll() ? 'Copied!' : 'Copy all' }}</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100">
+              <td class="px-4 py-3 text-gray-500 font-medium">Plain</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.plain ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('plain')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+            <tr class="border-b border-gray-100">
+              <td class="px-4 py-3 text-gray-500 font-medium">With commas</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.commas ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('commas')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-gray-500 font-medium">In words</td>
+              <td class="px-4 py-3 text-gray-800 break-words select-all">{{ result()?.words ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('words')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </main>
   `
@@ -131,6 +147,7 @@ export class NumberFormatter {
   readonly input = signal('');
   readonly error = signal('');
   readonly copiedField = signal<string | null>(null);
+  readonly copiedAll = signal(false);
 
   readonly result = computed<FormatterResult | null>(() => {
     const raw = this.input().trim().replace(/,/g, '');
@@ -163,6 +180,17 @@ export class NumberFormatter {
     }
     this.error.set('');
     this.input.set(trimmed);
+  }
+
+  async copyAll(): Promise<void> {
+    const r = this.result();
+    if (!r) return;
+    const text = `plain: ${r.plain}\nwith commas: ${r.commas}\nin words: ${r.words}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.copiedAll.set(true);
+      setTimeout(() => this.copiedAll.set(false), 2000);
+    } catch {}
   }
 
   async copyField(field: keyof FormatterResult): Promise<void> {
