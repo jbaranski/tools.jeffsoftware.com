@@ -62,8 +62,6 @@ function numberToWords(input: string): string {
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
-type DisplayMode = 'all' | 'commas' | 'words';
-
 @Component({
   selector: 'app-number-formatter',
   imports: [RouterLink, FormsModule],
@@ -75,48 +73,34 @@ type DisplayMode = 'all' | 'commas' | 'words';
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Number Formatter</h2>
       <p class="text-gray-500 text-sm mb-6">Format a number with comma separators and convert it to English words.</p>
 
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
-        <div class="flex-1">
-          <label class="block text-xs font-medium text-gray-600 mb-1">Number</label>
-          <input
-            type="text"
-            [ngModel]="input()"
-            (ngModelChange)="onInput($event)"
-            placeholder="e.g. 1000000"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
-          />
-          @if (error()) {
-            <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
-          }
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">Display</label>
-          <select
-            [ngModel]="displayMode()"
-            (ngModelChange)="displayMode.set($event)"
-            class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white cursor-pointer">
-            <option value="all">All</option>
-            <option value="commas">Commas only</option>
-            <option value="words">Words only</option>
-          </select>
-        </div>
+      <div class="mb-6">
+        <label class="block text-xs font-medium text-gray-600 mb-1">Number</label>
+        <input
+          type="text"
+          [ngModel]="input()"
+          (ngModelChange)="onInput($event)"
+          placeholder="e.g. 1,000,000 or 1000000"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+        />
+        @if (error()) {
+          <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
+        }
       </div>
 
       @if (result(); as r) {
         <div class="space-y-3">
-          @if (displayMode() === 'all' || displayMode() === 'commas') {
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p class="text-xs font-medium text-gray-500 mb-1">With commas</p>
-              <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.commas }}</p>
-            </div>
-          }
-          @if (displayMode() === 'all' || displayMode() === 'words') {
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <p class="text-xs font-medium text-gray-500 mb-1">In words</p>
-              <p class="text-lg text-gray-800 select-all break-words">{{ r.words }}</p>
-            </div>
-          }
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p class="text-xs font-medium text-gray-500 mb-1">Plain</p>
+            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.plain }}</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p class="text-xs font-medium text-gray-500 mb-1">With commas</p>
+            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.commas }}</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <p class="text-xs font-medium text-gray-500 mb-1">In words</p>
+            <p class="text-lg text-gray-800 select-all break-words">{{ r.words }}</p>
+          </div>
         </div>
       }
     </main>
@@ -124,13 +108,12 @@ type DisplayMode = 'all' | 'commas' | 'words';
 })
 export class NumberFormatter {
   readonly input = signal('');
-  readonly displayMode = signal<DisplayMode>('all');
   readonly error = signal('');
 
   readonly result = computed(() => {
-    const raw = this.input().trim();
+    const raw = this.input().trim().replace(/,/g, '');
     if (!raw) return null;
-    return { commas: formatWithCommas(raw), words: numberToWords(raw) };
+    return { plain: raw, commas: formatWithCommas(raw), words: numberToWords(raw) };
   });
 
   onInput(value: string): void {
@@ -140,17 +123,18 @@ export class NumberFormatter {
       this.error.set('');
       return;
     }
-    if (!/^\d+$/.test(trimmed)) {
-      this.error.set('Only digits allowed.');
+    const stripped = trimmed.replace(/,/g, '');
+    if (!/^\d+$/.test(stripped)) {
+      this.error.set('Only digits and commas allowed.');
       this.input.set(trimmed);
       return;
     }
-    if (trimmed.length > 1 && trimmed[0] === '0') {
+    if (stripped.length > 1 && stripped[0] === '0') {
       this.error.set('No leading zeros.');
       this.input.set(trimmed);
       return;
     }
-    if (trimmed.length > 24) {
+    if (stripped.length > 24) {
       this.error.set('Number too large (max 24 digits).');
       this.input.set(trimmed);
       return;
