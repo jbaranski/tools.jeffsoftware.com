@@ -43,7 +43,6 @@ function numberToWords(input: string): string {
     const start = Math.max(0, i - 3);
     groups.push(parseInt(input.slice(start, i), 10));
   }
-  // groups[0] = ones group, groups[1] = thousands, etc.
   let parts: string[] = [];
   for (let i = groups.length - 1; i >= 0; i--) {
     const g = groups[i];
@@ -60,6 +59,12 @@ function numberToWords(input: string): string {
   }
   const result = parts.join(', ');
   return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+interface FormatterResult {
+  plain: string;
+  commas: string;
+  words: string;
 }
 
 @Component({
@@ -87,30 +92,47 @@ function numberToWords(input: string): string {
         }
       </div>
 
-      @if (result(); as r) {
-        <div class="space-y-3">
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">Plain</p>
-            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.plain }}</p>
+      <div class="space-y-3">
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-xs font-medium text-gray-500">Plain</p>
+            <button
+              (click)="copyField('plain')"
+              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+            >{{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}</button>
           </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">With commas</p>
-            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.commas }}</p>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">In words</p>
-            <p class="text-lg text-gray-800 select-all break-words">{{ r.words }}</p>
-          </div>
+          <p class="font-mono text-lg text-gray-800 select-all break-all">{{ result()?.plain ?? '' }}</p>
         </div>
-      }
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-xs font-medium text-gray-500">With commas</p>
+            <button
+              (click)="copyField('commas')"
+              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+            >{{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}</button>
+          </div>
+          <p class="font-mono text-lg text-gray-800 select-all break-all">{{ result()?.commas ?? '' }}</p>
+        </div>
+        <div class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-xs font-medium text-gray-500">In words</p>
+            <button
+              (click)="copyField('words')"
+              class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+            >{{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}</button>
+          </div>
+          <p class="text-lg text-gray-800 select-all break-words">{{ result()?.words ?? '' }}</p>
+        </div>
+      </div>
     </main>
   `
 })
 export class NumberFormatter {
   readonly input = signal('');
   readonly error = signal('');
+  readonly copiedField = signal<string | null>(null);
 
-  readonly result = computed(() => {
+  readonly result = computed<FormatterResult | null>(() => {
     const raw = this.input().trim().replace(/,/g, '');
     if (!raw) return null;
     return { plain: raw, commas: formatWithCommas(raw), words: numberToWords(raw) };
@@ -141,5 +163,15 @@ export class NumberFormatter {
     }
     this.error.set('');
     this.input.set(trimmed);
+  }
+
+  async copyField(field: keyof FormatterResult): Promise<void> {
+    const r = this.result();
+    if (!r) return;
+    try {
+      await navigator.clipboard.writeText(r[field]);
+      this.copiedField.set(field);
+      setTimeout(() => this.copiedField.set(null), 2000);
+    } catch {}
   }
 }

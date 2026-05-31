@@ -13,14 +13,11 @@ interface Tool {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main>
-      <ul class="space-y-2">
+      <ul class="space-y-1">
         @for (tool of tools; track tool.route) {
           <li>
-            <a [routerLink]="tool.route"
-              class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors group">
-              <span class="text-blue-500 font-medium group-hover:underline">{{ tool.name }}</span>
-              <span class="text-gray-500 text-sm">{{ tool.description }}</span>
-            </a>
+            <a [routerLink]="tool.route" class="text-blue-500 hover:underline font-medium">{{ tool.name }}</a>
+            <span class="text-gray-500 text-sm"> — {{ tool.description }}</span>
           </li>
         }
       </ul>
