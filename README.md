@@ -1,59 +1,55 @@
-# Tools
+# tools.jeffsoftware.com
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.13.
+A growing collection of handy utilities, inspired by [tools.simonwillison.net](https://tools.simonwillison.net/). Built with Angular 21 + Tailwind CSS v4, hosted on Netlify.
 
-## Development server
+## Tools
 
-To start a local development server, run:
+| Tool | Route | Description |
+|---|---|---|
+| Username Generator | `/username-generator` | Generate a random 12-character alphanumeric string (A–Z, a–z, 0–9) |
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Development
 
 ```bash
-ng generate component component-name
+npm install
+ng serve        # dev server at http://localhost:4200
+ng build        # production build → dist/tools/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Adding a new tool
 
-```bash
-ng generate --help
-```
+1. **Generate the page component**
+   ```bash
+   ng generate component pages/<tool-name> --inline-style --inline-template --skip-tests
+   ```
 
-## Building
+2. **Add the route** in `src/app/app.routes.ts`
+   ```ts
+   import { MyTool } from './pages/my-tool/my-tool';
 
-To build the project run:
+   export const routes: Routes = [
+     ...
+     { path: 'my-tool', component: MyTool },
+   ];
+   ```
 
-```bash
-ng build
-```
+3. **Add the tool to the home listing** in `src/app/pages/home/home.ts` — append an entry to the `tools` array:
+   ```ts
+   {
+     name: 'My Tool',
+     description: 'One sentence description.',
+     route: '/my-tool',
+   }
+   ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+4. **Implement the component** in `src/app/pages/<tool-name>/<tool-name>.ts`. Include a `← All tools` back link using `routerLink="/"`.
 
-## Running unit tests
+## Style
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Matches [mlstoday.jeffsoftware.com](https://mlstoday.jeffsoftware.com) — Inter font, Tailwind v4 CSS-first config, gray/blue palette. Global styles live in `src/styles.css`.
 
-```bash
-ng test
-```
+## Rules
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- No unit tests — testing is done manually by running the app
+- Client-only — no SSR
+- All project files live at the repo root (no subfolder)
