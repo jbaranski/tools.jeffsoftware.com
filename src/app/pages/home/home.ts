@@ -30,6 +30,11 @@ interface Tool {
 export class Home {
   readonly tools: Tool[] = [
     {
+      name: 'TPS Calculator',
+      description: 'Calculate throughput per second, minute, hour, and day from a count and time window.',
+      route: '/tps',
+    },
+    {
       name: 'Username Generator',
       description: 'Generate a random 12-character alphanumeric string.',
       route: '/username-generator',
