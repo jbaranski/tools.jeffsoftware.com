@@ -26,22 +26,38 @@ function threeDigitsToWords(n: number): string {
 }
 
 function numberToWords(n: number): string {
-  const int = Math.floor(Math.abs(n));
-  if (int === 0) return 'zero';
+  const abs = Math.abs(n);
+  const int = Math.floor(abs);
   const prefix = n < 0 ? 'negative ' : '';
-  const chunks: number[] = [];
-  let remaining = int;
-  while (remaining > 0) {
-    chunks.push(remaining % 1000);
-    remaining = Math.floor(remaining / 1000);
+
+  let intWords: string;
+  if (int === 0) {
+    intWords = 'zero';
+  } else {
+    const chunks: number[] = [];
+    let remaining = int;
+    while (remaining > 0) {
+      chunks.push(remaining % 1000);
+      remaining = Math.floor(remaining / 1000);
+    }
+    const parts: string[] = [];
+    for (let i = chunks.length - 1; i >= 0; i--) {
+      if (chunks[i] === 0) continue;
+      const words = threeDigitsToWords(chunks[i]);
+      parts.push(SCALE[i] ? words + ' ' + SCALE[i] : words);
+    }
+    intWords = parts.join(', ');
   }
-  const parts: string[] = [];
-  for (let i = chunks.length - 1; i >= 0; i--) {
-    if (chunks[i] === 0) continue;
-    const words = threeDigitsToWords(chunks[i]);
-    parts.push(SCALE[i] ? words + ' ' + SCALE[i] : words);
-  }
-  return prefix + parts.join(', ');
+
+  // Use toFixed(2) to match formatNumber's rounding, then strip trailing zeros
+  const str = parseFloat(abs.toFixed(2)).toString();
+  const dotIdx = str.indexOf('.');
+  const decDigits = dotIdx >= 0 ? str.slice(dotIdx + 1) : '';
+  const decPart = decDigits
+    ? ' point ' + decDigits.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    : '';
+
+  return prefix + intWords + decPart;
 }
 
 function formatNumber(n: number): string {
@@ -122,31 +138,51 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         </div>
       </div>
 
-      @if (rows().length > 0) {
-        <div class="overflow-x-auto rounded-xl border border-gray-200">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left px-4 py-3 font-semibold text-gray-600 w-28">Per</th>
-                <th class="text-right px-4 py-3 font-semibold text-gray-600">Value</th>
-                <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">In words</th>
+      <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 w-28">Per</th>
+              <th class="text-right px-4 py-3 font-semibold text-gray-600">Value</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">In words</th>
+              <th class="px-4 py-3 w-20">
+                <button
+                  (click)="copyAll()"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors float-right"
+                >{{ copiedAll() ? 'Copied!' : 'Copy all' }}</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.label) {
+              <tr class="border-b border-gray-100 last:border-0">
+                <td class="px-4 py-3 text-gray-500 font-medium">{{ row.label }}</td>
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800">{{ row.formatted }}</td>
+                <td class="px-4 py-3 text-gray-500 italic hidden sm:table-cell">{{ row.words }}</td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    (click)="copyRow(row)"
+                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                  >{{ copiedRow() === row.label ? 'Copied!' : 'Copy' }}</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              @for (row of rows(); track row.label) {
-                <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                  <td class="px-4 py-3 text-gray-500 font-medium">{{ row.label }}</td>
-                  <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800">{{ row.formatted }}</td>
-                  <td class="px-4 py-3 text-gray-500 italic hidden sm:table-cell">{{ row.words }}</td>
-                </tr>
-                <tr class="sm:hidden border-b border-gray-100 last:border-0 bg-gray-50">
-                  <td colspan="2" class="px-4 pb-3 text-gray-400 italic text-xs">{{ row.words }}</td>
+              <tr class="sm:hidden border-b border-gray-100 last:border-0 bg-gray-50">
+                <td colspan="3" class="px-4 pb-3 text-gray-400 italic text-xs">{{ row.words }}</td>
+              </tr>
+            }
+            @if (rows().length === 0) {
+              @for (_ of emptyRows; track $index) {
+                <tr class="border-b border-gray-100 last:border-0">
+                  <td class="px-4 py-3 text-gray-300">—</td>
+                  <td class="px-4 py-3"></td>
+                  <td class="px-4 py-3 hidden sm:table-cell"></td>
+                  <td class="px-4 py-3"></td>
                 </tr>
               }
-            </tbody>
-          </table>
-        </div>
-      }
+            }
+          </tbody>
+        </table>
+      </div>
     </main>
   `
 })
@@ -154,6 +190,10 @@ export class TpsCalculator {
   readonly count = signal<number | null>(null);
   readonly uotQty = signal<number>(1);
   readonly uotUnit = signal<TimeUnit>('minute');
+  readonly copiedRow = signal<string | null>(null);
+  readonly copiedAll = signal(false);
+
+  readonly emptyRows = Array(4).fill(null);
 
   readonly rows = computed<TpsRow[]>(() => {
     const c = this.count();
@@ -182,4 +222,22 @@ export class TpsCalculator {
       };
     });
   });
+
+  async copyRow(row: TpsRow): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(`${row.label}: ${row.formatted}`);
+      this.copiedRow.set(row.label);
+      setTimeout(() => this.copiedRow.set(null), 2000);
+    } catch {}
+  }
+
+  async copyAll(): Promise<void> {
+    const text = this.rows().map(r => `${r.label}: ${r.formatted} (${r.words})`).join('\n');
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.copiedAll.set(true);
+      setTimeout(() => this.copiedAll.set(false), 2000);
+    } catch {}
+  }
 }

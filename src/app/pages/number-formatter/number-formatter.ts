@@ -25,26 +25,31 @@ function groupToWords(n: number): string {
   return result;
 }
 
-function formatWithCommas(input: string): string {
+function intToCommas(intStr: string): string {
   const result: string[] = [];
   let count = 0;
-  for (let i = input.length - 1; i >= 0; i--) {
+  for (let i = intStr.length - 1; i >= 0; i--) {
     if (count > 0 && count % 3 === 0) result.unshift(',');
-    result.unshift(input[i]);
+    result.unshift(intStr[i]);
     count++;
   }
   return result.join('');
 }
 
-function numberToWords(input: string): string {
-  if (input === '0') return 'Zero';
+function formatWithCommas(input: string): string {
+  const [intPart, decPart] = input.split('.');
+  const commaInt = intToCommas(intPart);
+  return decPart !== undefined ? commaInt + '.' + decPart : commaInt;
+}
+
+function intPartToWords(intStr: string): string {
+  if (intStr === '0') return 'zero';
   const groups: number[] = [];
-  for (let i = input.length; i > 0; i -= 3) {
+  for (let i = intStr.length; i > 0; i -= 3) {
     const start = Math.max(0, i - 3);
-    groups.push(parseInt(input.slice(start, i), 10));
+    groups.push(parseInt(intStr.slice(start, i), 10));
   }
-  // groups[0] = ones group, groups[1] = thousands, etc.
-  let parts: string[] = [];
+  const parts: string[] = [];
   for (let i = groups.length - 1; i >= 0; i--) {
     const g = groups[i];
     if (g === 0) continue;
@@ -58,8 +63,23 @@ function numberToWords(input: string): string {
       parts.push(words);
     }
   }
-  const result = parts.join(', ');
+  return parts.join(', ');
+}
+
+function numberToWords(input: string): string {
+  const [intStr, decStr] = input.split('.');
+  const intWords = intPartToWords(intStr);
+  const decPart = decStr
+    ? ' point ' + decStr.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    : '';
+  const result = intWords + decPart;
   return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+interface FormatterResult {
+  plain: string;
+  commas: string;
+  words: string;
 }
 
 @Component({
@@ -87,30 +107,64 @@ function numberToWords(input: string): string {
         }
       </div>
 
-      @if (result(); as r) {
-        <div class="space-y-3">
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">Plain</p>
-            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.plain }}</p>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">With commas</p>
-            <p class="font-mono text-lg text-gray-800 select-all break-all">{{ r.commas }}</p>
-          </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 mb-1">In words</p>
-            <p class="text-lg text-gray-800 select-all break-words">{{ r.words }}</p>
-          </div>
-        </div>
-      }
+      <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 w-32">Format</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600">Value</th>
+              <th class="px-4 py-3 w-24">
+                <button
+                  (click)="copyAll()"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors float-right"
+                >{{ copiedAll() ? 'Copied!' : 'Copy all' }}</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-gray-100">
+              <td class="px-4 py-3 text-gray-500 font-medium">Plain</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.plain ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('plain')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+            <tr class="border-b border-gray-100">
+              <td class="px-4 py-3 text-gray-500 font-medium">With commas</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.commas ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('commas')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-gray-500 font-medium">In words</td>
+              <td class="px-4 py-3 text-gray-800 break-words select-all">{{ result()?.words ?? '' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="copyField('words')"
+                  class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+                >{{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </main>
   `
 })
 export class NumberFormatter {
   readonly input = signal('');
   readonly error = signal('');
+  readonly copiedField = signal<string | null>(null);
+  readonly copiedAll = signal(false);
 
-  readonly result = computed(() => {
+  readonly result = computed<FormatterResult | null>(() => {
     const raw = this.input().trim().replace(/,/g, '');
     if (!raw) return null;
     return { plain: raw, commas: formatWithCommas(raw), words: numberToWords(raw) };
@@ -124,22 +178,44 @@ export class NumberFormatter {
       return;
     }
     const stripped = trimmed.replace(/,/g, '');
-    if (!/^\d+$/.test(stripped)) {
-      this.error.set('Only digits and commas allowed.');
+    if (!/^\d+(\.\d*)?$/.test(stripped)) {
+      this.error.set('Only digits, commas, and one decimal point allowed.');
       this.input.set(trimmed);
       return;
     }
-    if (stripped.length > 1 && stripped[0] === '0') {
+    const [intPart] = stripped.split('.');
+    if (intPart.length > 1 && intPart[0] === '0') {
       this.error.set('No leading zeros.');
       this.input.set(trimmed);
       return;
     }
-    if (stripped.length > 24) {
-      this.error.set('Number too large (max 24 digits).');
+    if (intPart.length > 24) {
+      this.error.set('Integer part too large (max 24 digits).');
       this.input.set(trimmed);
       return;
     }
     this.error.set('');
     this.input.set(trimmed);
+  }
+
+  async copyAll(): Promise<void> {
+    const r = this.result();
+    if (!r) return;
+    const text = `plain: ${r.plain}\nwith commas: ${r.commas}\nin words: ${r.words}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      this.copiedAll.set(true);
+      setTimeout(() => this.copiedAll.set(false), 2000);
+    } catch {}
+  }
+
+  async copyField(field: keyof FormatterResult): Promise<void> {
+    const r = this.result();
+    if (!r) return;
+    try {
+      await navigator.clipboard.writeText(r[field]);
+      this.copiedField.set(field);
+      setTimeout(() => this.copiedField.set(null), 2000);
+    } catch {}
   }
 }

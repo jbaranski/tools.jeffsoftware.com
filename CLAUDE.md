@@ -15,3 +15,6 @@ Match the style of https://mlstoday.jeffsoftware.com — Inter font, Tailwind v4
 
 ### Project structure
 All files live at the repo root (no subfolder for the Angular project).
+
+### No hover backgrounds
+Never use `hover:bg-*` on non-interactive content elements such as list items, table rows, or cards. Hover background changes are only acceptable on buttons and form controls.
