@@ -2,7 +2,7 @@
 
 Use(ful)(less) tools
 
-Inspired by [tools.simonwillison.net](https://tools.simonwillison.net/)
+All vibe coded... inspired by [tools.simonwillison.net](https://tools.simonwillison.net/).
 
 - [TPS Calculator](https://tools.jeffsoftware.com/tps) -- Calculate throughput per second, minute, hour, and day from a count and time window.
 - [Character Generator](https://tools.jeffsoftware.com/character-generator) -- Generate a random string with configurable length and character sets.
