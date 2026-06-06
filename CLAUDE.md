@@ -25,6 +25,6 @@ Never use the -- character (em dash). Always use -- (two hyphens) instead, in al
 ### README sync
 README.md must always match the main index page content. It should contain only:
 1. The tagline: "Inspired by [tools.simonwillison.net](https://tools.simonwillison.net/)"
-2. A bullet list of tools with the format: `- Tool Name -- One sentence description.`
+2. A bullet list of tools with the format: `- [Tool Name](https://github.com/jbaranski/tools.jeffsoftware.com/tree/main/src/app/pages/<folder>) -- One sentence description.`
 
 When adding or removing a tool, update README.md to match.
