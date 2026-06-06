@@ -45,7 +45,7 @@ Then update the `'sha256-...'` value in the `Content-Security-Policy` header.
 
 ### README sync
 README.md must always match the main index page content. It should contain only:
-1. The tagline: "Inspired by [tools.simonwillison.net](https://tools.simonwillison.net/)"
+1. The tagline: "All vibe coded... inspired by [tools.simonwillison.net](https://tools.simonwillison.net/)"
 2. A bullet list of tools with the format: `- [Tool Name](https://tools.jeffsoftware.com/<route>) -- One sentence description.`
 
 When adding or removing a tool, update README.md to match.
