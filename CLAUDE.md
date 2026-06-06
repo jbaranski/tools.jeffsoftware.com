@@ -22,6 +22,21 @@ Never use `hover:bg-*` on non-interactive content elements such as list items, t
 ### No em dashes
 Never use the -- character (em dash). Always use -- (two hyphens) instead, in all files including this one, README.md, code comments, and documentation.
 
+### CSP script-src hash
+`netlify.toml` has a `'unsafe-hashes'` + SHA-256 hash in `script-src` for the inline event handler Angular emits on its deferred stylesheet link:
+
+```html
+<link rel="stylesheet" href="..." media="print" onload="this.media='all'">
+```
+
+The hash covers the attribute value `this.media='all'` and does NOT change between builds (the filename changes, the handler string does not). If a future Angular upgrade changes that string (e.g. to `this.media='screen'`), the browser will show a CSP error and the hash in `netlify.toml` must be recomputed:
+
+```
+printf "new.handler.string" | openssl dgst -sha256 -binary | base64
+```
+
+Then update the `'sha256-...'` value in the `Content-Security-Policy` header.
+
 ### README sync
 README.md must always match the main index page content. It should contain only:
 1. The tagline: "Inspired by [tools.simonwillison.net](https://tools.simonwillison.net/)"
