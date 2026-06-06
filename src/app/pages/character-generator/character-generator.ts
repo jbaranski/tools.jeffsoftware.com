@@ -55,7 +55,7 @@ function generateChars(chars: string, length: number): string {
             <input type="checkbox" [checked]="includeSpecial()"
               (change)="includeSpecial.set(($event.target as HTMLInputElement).checked)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
-            <span class="text-sm text-gray-700 font-mono">!@#$%^&amp;*()[]{}&#92;|?,&lt;&gt;/-_=+;:\`~</span>
+            <span class="text-sm text-gray-700 font-mono">!@#$%^&amp;*()[]{{ '{' }}{{ '}' }}&#92;|?,&lt;&gt;/-_=+;:\`~</span>
           </label>
         </div>
       </div>
