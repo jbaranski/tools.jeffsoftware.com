@@ -19,6 +19,9 @@ Match the style of https://mlstoday.jeffsoftware.com -- Inter font, Tailwind v4,
 ### Project structure
 All files live at the repo root (no subfolder for the Angular project).
 
+### Mathematically consistent margins
+All vertical spacing between rows/sections on a page must use a single uniform margin value. Never mix different `mb-*` or `space-y-*` values across sibling rows -- pick one step from the Tailwind spacing scale and apply it everywhere on that page so the rhythm is visually even.
+
 ### No hover backgrounds
 Never use `hover:bg-*` on non-interactive content elements such as list items, table rows, or cards. Hover background changes are only acceptable on buttons and form controls.
 

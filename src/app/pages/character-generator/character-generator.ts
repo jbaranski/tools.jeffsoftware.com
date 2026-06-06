@@ -22,9 +22,9 @@ function generateChars(chars: string, length: number): string {
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Character Generator</h2>
-      <p class="text-gray-500 text-sm mb-8">Generate a random string with configurable length and character sets.</p>
+      <p class="text-gray-500 text-sm mb-5">Generate a random string with configurable length and character sets.</p>
 
-      <div class="mb-8 space-y-5">
+      <div class="mb-5 space-y-5">
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-gray-700 w-16" for="char-length">Length</label>
           <input id="char-length" type="number" [value]="length()" min="1" max="256"
@@ -61,9 +61,9 @@ function generateChars(chars: string, length: number): string {
       </div>
 
       @if (charset().length === 0) {
-        <p class="text-red-500 text-sm mb-6">Select at least one character set.</p>
+        <p class="text-red-500 text-sm mb-5">Select at least one character set.</p>
       } @else {
-        <div class="mb-6">
+        <div class="mb-5">
           <span class="font-mono text-2xl font-semibold tracking-widest text-gray-800 bg-gray-100 px-4 py-2 rounded-lg select-all break-all inline-block">
             {{ result() }}
           </span>
