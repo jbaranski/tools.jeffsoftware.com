@@ -22,48 +22,48 @@ function generateChars(chars: string, length: number): string {
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Character Generator</h2>
-      <p class="text-gray-500 text-sm mb-6">Generate a random string with configurable length and character sets.</p>
+      <p class="text-gray-500 text-sm mb-8">Generate a random string with configurable length and character sets.</p>
 
-      <div class="mb-5 space-y-3">
+      <div class="mb-8 space-y-5">
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-gray-700 w-16" for="char-length">Length</label>
           <input id="char-length" type="number" [value]="length()" min="1" max="256"
-            (input)="length.set(clampLength($any($event.target).value))"
+            (input)="length.set(clampLength($any($event.target).value)); generate()"
             class="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
 
         <div class="flex flex-wrap gap-4">
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeUpper()"
-              (change)="includeUpper.set($any($event.target).checked)"
+              (change)="includeUpper.set($any($event.target).checked); generate()"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">A-Z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeLower()"
-              (change)="includeLower.set($any($event.target).checked)"
+              (change)="includeLower.set($any($event.target).checked); generate()"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">a-z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeDigits()"
-              (change)="includeDigits.set($any($event.target).checked)"
+              (change)="includeDigits.set($any($event.target).checked); generate()"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">0-9</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeSpecial()"
-              (change)="includeSpecial.set($any($event.target).checked)"
+              (change)="includeSpecial.set($any($event.target).checked); generate()"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
-            <span class="text-sm text-gray-700 font-mono">!@#$%^&amp;*()[]{{ '{' }}{{ '}' }}&#92;|?,&lt;&gt;/-_=+;:\`~</span>
+            <span class="text-sm text-gray-700 font-mono">!@$%...</span>
           </label>
         </div>
       </div>
 
       @if (charset().length === 0) {
-        <p class="text-red-500 text-sm mb-4">Select at least one character set.</p>
+        <p class="text-red-500 text-sm mb-6">Select at least one character set.</p>
       } @else {
-        <div class="mb-4">
+        <div class="mb-6">
           <span class="font-mono text-2xl font-semibold tracking-widest text-gray-800 bg-gray-100 px-4 py-2 rounded-lg select-all break-all inline-block">
             {{ result() }}
           </span>
