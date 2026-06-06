@@ -32,9 +32,9 @@ export class Home {
       route: '/tps',
     },
     {
-      name: 'Username Generator',
-      description: 'Generate a random 12-character alphanumeric string.',
-      route: '/username-generator',
+      name: 'Character Generator',
+      description: 'Generate a random string with configurable length and character sets.',
+      route: '/character-generator',
     },
     {
       name: 'Number Formatter',
