@@ -17,7 +17,7 @@ interface Tool {
         @for (tool of tools; track tool.route) {
           <li>
             <a [routerLink]="tool.route" class="text-blue-500 hover:underline font-medium">{{ tool.name }}</a>
-            <span class="text-gray-500 text-sm"> — {{ tool.description }}</span>
+            <span class="text-gray-500 text-sm"> -- {{ tool.description }}</span>
           </li>
         }
       </ul>
