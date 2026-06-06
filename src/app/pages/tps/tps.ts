@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -49,7 +48,6 @@ function numberToWords(n: number): string {
     intWords = parts.join(', ');
   }
 
-  // Use toFixed(2) to match formatNumber's rounding, then strip trailing zeros
   const str = parseFloat(abs.toFixed(2)).toString();
   const dotIdx = str.indexOf('.');
   const decDigits = dotIdx >= 0 ? str.slice(dotIdx + 1) : '';
@@ -86,7 +84,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
 
 @Component({
   selector: 'app-tps',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4 max-w-2xl">
@@ -104,8 +102,8 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             type="number"
             min="0"
             step="1"
-            [ngModel]="count()"
-            (ngModelChange)="count.set($event)"
+            [value]="count() ?? ''"
+            (input)="onCountChange($event)"
             placeholder="e.g. 1000000"
             class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           />
@@ -117,8 +115,8 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             type="number"
             min="1"
             step="1"
-            [ngModel]="uotQty()"
-            (ngModelChange)="uotQty.set($event)"
+            [value]="uotQty()"
+            (input)="onQtyChange($event)"
             class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm w-24 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           />
         </div>
@@ -126,8 +124,8 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         <div class="flex flex-col gap-1">
           <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Unit</label>
           <select
-            [ngModel]="uotUnit()"
-            (ngModelChange)="uotUnit.set($event)"
+            [value]="uotUnit()"
+            (change)="onUnitChange($event)"
             class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white"
           >
             <option value="second">second</option>
@@ -214,14 +212,23 @@ export class TpsCalculator {
 
     return intervals.map(({ label, multiplier }) => {
       const value = perSecond * multiplier;
-      return {
-        label,
-        value,
-        formatted: formatNumber(value),
-        words: numberToWords(value),
-      };
+      return { label, value, formatted: formatNumber(value), words: numberToWords(value) };
     });
   });
+
+  onCountChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.count.set(val === '' ? null : Number(val));
+  }
+
+  onQtyChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this.uotQty.set(val === '' ? 1 : Number(val));
+  }
+
+  onUnitChange(event: Event): void {
+    this.uotUnit.set((event.target as HTMLSelectElement).value as TimeUnit);
+  }
 
   async copyRow(row: TpsRow): Promise<void> {
     try {

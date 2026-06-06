@@ -28,32 +28,32 @@ function generateChars(chars: string, length: number): string {
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-gray-700 w-16" for="char-length">Length</label>
           <input id="char-length" type="number" [value]="length()" min="1" max="256"
-            (input)="length.set(clampLength($any($event.target).value)); generate()"
+            (input)="onLengthChange($event)"
             class="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
 
         <div class="flex flex-wrap gap-4">
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeUpper()"
-              (change)="includeUpper.set($any($event.target).checked); generate()"
+              (change)="onUpperChange($event)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">A-Z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeLower()"
-              (change)="includeLower.set($any($event.target).checked); generate()"
+              (change)="onLowerChange($event)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">a-z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeDigits()"
-              (change)="includeDigits.set($any($event.target).checked); generate()"
+              (change)="onDigitsChange($event)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">0-9</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeSpecial()"
-              (change)="includeSpecial.set($any($event.target).checked); generate()"
+              (change)="onSpecialChange($event)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700 font-mono">!@$%...</span>
           </label>
@@ -84,11 +84,11 @@ function generateChars(chars: string, length: number): string {
   `
 })
 export class CharacterGenerator {
-  length = signal(12);
-  includeUpper = signal(true);
-  includeLower = signal(true);
-  includeDigits = signal(true);
-  includeSpecial = signal(false);
+  readonly length = signal(12);
+  readonly includeUpper = signal(true);
+  readonly includeLower = signal(true);
+  readonly includeDigits = signal(true);
+  readonly includeSpecial = signal(false);
 
   readonly charset = computed(() => {
     let s = '';
@@ -101,6 +101,31 @@ export class CharacterGenerator {
 
   readonly result = signal(generateChars(UPPER + LOWER + DIGITS, 12));
   readonly copied = signal(false);
+
+  onLengthChange(event: Event): void {
+    this.length.set(this.clampLength((event.target as HTMLInputElement).value));
+    this.generate();
+  }
+
+  onUpperChange(event: Event): void {
+    this.includeUpper.set((event.target as HTMLInputElement).checked);
+    this.generate();
+  }
+
+  onLowerChange(event: Event): void {
+    this.includeLower.set((event.target as HTMLInputElement).checked);
+    this.generate();
+  }
+
+  onDigitsChange(event: Event): void {
+    this.includeDigits.set((event.target as HTMLInputElement).checked);
+    this.generate();
+  }
+
+  onSpecialChange(event: Event): void {
+    this.includeSpecial.set((event.target as HTMLInputElement).checked);
+    this.generate();
+  }
 
   clampLength(value: string): number {
     const n = parseInt(value, 10);
