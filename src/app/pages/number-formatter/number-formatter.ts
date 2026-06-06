@@ -1,5 +1,4 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -84,7 +83,7 @@ interface FormatterResult {
 
 @Component({
   selector: 'app-number-formatter',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4">
@@ -97,8 +96,8 @@ interface FormatterResult {
         <label class="block text-xs font-medium text-gray-600 mb-1">Number</label>
         <input
           type="text"
-          [ngModel]="input()"
-          (ngModelChange)="onInput($event)"
+          [value]="input()"
+          (input)="onInput($event)"
           placeholder="e.g. 1,000,000 or 1000000"
           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
         />
@@ -170,7 +169,8 @@ export class NumberFormatter {
     return { plain: raw, commas: formatWithCommas(raw), words: numberToWords(raw) };
   });
 
-  onInput(value: string): void {
+  onInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
     const trimmed = value.trim();
     if (trimmed === '') {
       this.input.set('');
