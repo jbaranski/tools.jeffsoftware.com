@@ -16,19 +16,22 @@ interface Tool {
       <ul class="space-y-1">
         @for (tool of tools; track tool.route) {
           <li>
-            <a [routerLink]="tool.route" class="text-blue-500 hover:underline font-medium">{{ tool.name }}</a>
+            <a [routerLink]="tool.route" class="text-blue-500 hover:underline font-medium">{{
+              tool.name
+            }}</a>
             <span class="text-gray-500 text-sm"> -- {{ tool.description }}</span>
           </li>
         }
       </ul>
     </main>
-  `
+  `,
 })
 export class Home {
   readonly tools: Tool[] = [
     {
       name: 'TPS Calculator',
-      description: 'Calculate throughput per second, minute, hour, and day from a count and time window.',
+      description:
+        'Calculate throughput per second, minute, hour, and day from a count and time window.',
       route: '/tps',
     },
     {

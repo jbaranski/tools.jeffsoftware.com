@@ -23,6 +23,9 @@ body {
   padding: 16px;
 }
 
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   font-family: inherit;
 }
