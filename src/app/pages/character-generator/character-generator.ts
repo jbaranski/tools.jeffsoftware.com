@@ -28,32 +28,32 @@ function generateChars(chars: string, length: number): string {
         <div class="flex items-center gap-3">
           <label class="text-sm font-medium text-gray-700 w-16" for="char-length">Length</label>
           <input id="char-length" type="number" [value]="length()" min="1" max="256"
-            (input)="length.set(clampLength(($event.target as HTMLInputElement).value))"
+            (input)="length.set(clampLength($any($event.target).value))"
             class="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
 
         <div class="flex flex-wrap gap-4">
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeUpper()"
-              (change)="includeUpper.set(($event.target as HTMLInputElement).checked)"
+              (change)="includeUpper.set($any($event.target).checked)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">A-Z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeLower()"
-              (change)="includeLower.set(($event.target as HTMLInputElement).checked)"
+              (change)="includeLower.set($any($event.target).checked)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">a-z</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeDigits()"
-              (change)="includeDigits.set(($event.target as HTMLInputElement).checked)"
+              (change)="includeDigits.set($any($event.target).checked)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700">0-9</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" [checked]="includeSpecial()"
-              (change)="includeSpecial.set(($event.target as HTMLInputElement).checked)"
+              (change)="includeSpecial.set($any($event.target).checked)"
               class="w-4 h-4 accent-blue-500 cursor-pointer" />
             <span class="text-sm text-gray-700 font-mono">!@#$%^&amp;*()[]{{ '{' }}{{ '}' }}&#92;|?,&lt;&gt;/-_=+;:\`~</span>
           </label>
