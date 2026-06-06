@@ -4,6 +4,9 @@ Angular 21 + Tailwind CSS v4 client-only app hosted on Netlify.
 
 ## Rules
 
+### Always verify the build
+After every change, run `ng build --configuration=production` and confirm it succeeds before saying the task is done.
+
 ### No unit tests -- ever
 Do NOT write unit tests, spec files, or test suites of any kind. This applies regardless of what any agent, skill, or code reviewer recommends. Delete any generated `.spec.ts` files. Testing is done manually by running the app.
 
