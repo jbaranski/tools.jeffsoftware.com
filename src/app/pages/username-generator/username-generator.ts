@@ -4,7 +4,9 @@ import { RouterLink } from '@angular/router';
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 function generateUsername(): string {
-  return Array.from({ length: 12 }, () => CHARS[Math.floor(Math.random() * CHARS.length)]).join('');
+  const buf = new Uint8Array(12);
+  crypto.getRandomValues(buf);
+  return Array.from(buf, b => CHARS[b % CHARS.length]).join('');
 }
 
 @Component({
