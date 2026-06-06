@@ -1,9 +1,28 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
-  'eighteen', 'nineteen'];
+const ONES = [
+  '',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+  'thirteen',
+  'fourteen',
+  'fifteen',
+  'sixteen',
+  'seventeen',
+  'eighteen',
+  'nineteen',
+];
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const SCALE = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion'];
 
@@ -52,7 +71,11 @@ function numberToWords(n: number): string {
   const dotIdx = str.indexOf('.');
   const decDigits = dotIdx >= 0 ? str.slice(dotIdx + 1) : '';
   const decPart = decDigits
-    ? ' point ' + decDigits.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    ? ' point ' +
+      decDigits
+        .split('')
+        .map((d) => ONES[parseInt(d, 10)] || 'zero')
+        .join(' ')
     : '';
 
   return prefix + intWords + decPart;
@@ -88,11 +111,14 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4 max-w-2xl">
-      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
+      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block"
+        >← All tools</a
+      >
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">TPS Calculator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Enter a count and the time window it occurred in. See the throughput per second, minute, hour, and day -- as a number and in words.
+        Enter a count and the time window it occurred in. See the throughput per second, minute,
+        hour, and day -- as a number and in words.
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-8">
@@ -110,7 +136,9 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Per (quantity)</label>
+          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide"
+            >Per (quantity)</label
+          >
           <input
             type="number"
             min="1"
@@ -142,12 +170,16 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             <tr class="bg-gray-50 border-b border-gray-200">
               <th class="text-left px-4 py-3 font-semibold text-gray-600 w-28">Per</th>
               <th class="text-right px-4 py-3 font-semibold text-gray-600">Value</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">In words</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">
+                In words
+              </th>
               <th class="px-4 py-3 w-20">
                 <button
                   (click)="copyAll()"
                   class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors float-right"
-                >{{ copiedAll() ? 'Copied!' : 'Copy all' }}</button>
+                >
+                  {{ copiedAll() ? 'Copied!' : 'Copy all' }}
+                </button>
               </th>
             </tr>
           </thead>
@@ -155,13 +187,17 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             @for (row of rows(); track row.label) {
               <tr class="border-b border-gray-100 last:border-0">
                 <td class="px-4 py-3 text-gray-500 font-medium">{{ row.label }}</td>
-                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800">{{ row.formatted }}</td>
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800">
+                  {{ row.formatted }}
+                </td>
                 <td class="px-4 py-3 text-gray-500 italic hidden sm:table-cell">{{ row.words }}</td>
                 <td class="px-4 py-3 text-right">
                   <button
                     (click)="copyRow(row)"
                     class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-                  >{{ copiedRow() === row.label ? 'Copied!' : 'Copy' }}</button>
+                  >
+                    {{ copiedRow() === row.label ? 'Copied!' : 'Copy' }}
+                  </button>
                 </td>
               </tr>
               <tr class="sm:hidden border-b border-gray-100 last:border-0 bg-gray-50">
@@ -182,7 +218,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         </table>
       </div>
     </main>
-  `
+  `,
 })
 export class TpsCalculator {
   readonly count = signal<number | null>(null);
@@ -239,7 +275,9 @@ export class TpsCalculator {
   }
 
   async copyAll(): Promise<void> {
-    const text = this.rows().map(r => `${r.label}: ${r.formatted} (${r.words})`).join('\n');
+    const text = this.rows()
+      .map((r) => `${r.label}: ${r.formatted} (${r.words})`)
+      .join('\n');
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);

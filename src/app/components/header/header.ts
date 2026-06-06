@@ -10,6 +10,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
         Jeff's Tools
       </h1>
     </header>
-  `
+  `,
 })
 export class Header {}

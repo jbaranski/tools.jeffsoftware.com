@@ -1,10 +1,39 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const ONES = [
+  '',
+  'one',
+  'two',
+  'three',
+  'four',
+  'five',
+  'six',
+  'seven',
+  'eight',
+  'nine',
+  'ten',
+  'eleven',
+  'twelve',
+  'thirteen',
+  'fourteen',
+  'fifteen',
+  'sixteen',
+  'seventeen',
+  'eighteen',
+  'nineteen',
+];
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-const SCALES = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion'];
+const SCALES = [
+  '',
+  'thousand',
+  'million',
+  'billion',
+  'trillion',
+  'quadrillion',
+  'quintillion',
+  'sextillion',
+];
 
 function groupToWords(n: number): string {
   if (n === 0) return '';
@@ -53,7 +82,7 @@ function intPartToWords(intStr: string): string {
     const g = groups[i];
     if (g === 0) continue;
     const isLastGroup = i === 0;
-    const higherGroupsExist = groups.slice(1).some(x => x !== 0);
+    const higherGroupsExist = groups.slice(1).some((x) => x !== 0);
     let words = groupToWords(g);
     if (isLastGroup && higherGroupsExist && g < 100) {
       parts.push('and ' + words);
@@ -69,7 +98,11 @@ function numberToWords(input: string): string {
   const [intStr, decStr] = input.split('.');
   const intWords = intPartToWords(intStr);
   const decPart = decStr
-    ? ' point ' + decStr.split('').map(d => ONES[parseInt(d, 10)] || 'zero').join(' ')
+    ? ' point ' +
+      decStr
+        .split('')
+        .map((d) => ONES[parseInt(d, 10)] || 'zero')
+        .join(' ')
     : '';
   const result = intWords + decPart;
   return result.charAt(0).toUpperCase() + result.slice(1);
@@ -87,10 +120,14 @@ interface FormatterResult {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4">
-      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
+      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block"
+        >← All tools</a
+      >
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Number Formatter</h2>
-      <p class="text-gray-500 text-sm mb-6">Format a number with comma separators and convert it to English words.</p>
+      <p class="text-gray-500 text-sm mb-6">
+        Format a number with comma separators and convert it to English words.
+      </p>
 
       <div class="mb-6">
         <label class="block text-xs font-medium text-gray-600 mb-1">Number</label>
@@ -116,46 +153,60 @@ interface FormatterResult {
                 <button
                   (click)="copyAll()"
                   class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors float-right"
-                >{{ copiedAll() ? 'Copied!' : 'Copy all' }}</button>
+                >
+                  {{ copiedAll() ? 'Copied!' : 'Copy all' }}
+                </button>
               </th>
             </tr>
           </thead>
           <tbody>
             <tr class="border-b border-gray-100">
               <td class="px-4 py-3 text-gray-500 font-medium">Plain</td>
-              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.plain ?? '' }}</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">
+                {{ result()?.plain ?? '' }}
+              </td>
               <td class="px-4 py-3 text-right">
                 <button
                   (click)="copyField('plain')"
                   class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-                >{{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}</button>
+                >
+                  {{ copiedField() === 'plain' ? 'Copied!' : 'Copy' }}
+                </button>
               </td>
             </tr>
             <tr class="border-b border-gray-100">
               <td class="px-4 py-3 text-gray-500 font-medium">With commas</td>
-              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">{{ result()?.commas ?? '' }}</td>
+              <td class="px-4 py-3 font-mono text-gray-800 break-all select-all">
+                {{ result()?.commas ?? '' }}
+              </td>
               <td class="px-4 py-3 text-right">
                 <button
                   (click)="copyField('commas')"
                   class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-                >{{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}</button>
+                >
+                  {{ copiedField() === 'commas' ? 'Copied!' : 'Copy' }}
+                </button>
               </td>
             </tr>
             <tr>
               <td class="px-4 py-3 text-gray-500 font-medium">In words</td>
-              <td class="px-4 py-3 text-gray-800 break-words select-all">{{ result()?.words ?? '' }}</td>
+              <td class="px-4 py-3 text-gray-800 break-words select-all">
+                {{ result()?.words ?? '' }}
+              </td>
               <td class="px-4 py-3 text-right">
                 <button
                   (click)="copyField('words')"
                   class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
-                >{{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}</button>
+                >
+                  {{ copiedField() === 'words' ? 'Copied!' : 'Copy' }}
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </main>
-  `
+  `,
 })
 export class NumberFormatter {
   readonly input = signal('');
