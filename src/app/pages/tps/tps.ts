@@ -94,7 +94,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">TPS Calculator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Enter a count and the time window it occurred in. See the throughput per second, minute, hour, and day — as a number and in words.
+        Enter a count and the time window it occurred in. See the throughput per second, minute, hour, and day -- as a number and in words.
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-8">
@@ -173,7 +173,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             @if (rows().length === 0) {
               @for (_ of emptyRows; track $index) {
                 <tr class="border-b border-gray-100 last:border-0">
-                  <td class="px-4 py-3 text-gray-300">—</td>
+                  <td class="px-4 py-3 text-gray-300">--</td>
                   <td class="px-4 py-3"></td>
                   <td class="px-4 py-3 hidden sm:table-cell"></td>
                   <td class="px-4 py-3"></td>
