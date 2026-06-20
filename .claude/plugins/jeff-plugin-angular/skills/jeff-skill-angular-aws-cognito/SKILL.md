@@ -58,7 +58,7 @@ export const environment = {
   userPoolClientId: '<YOUR_USER_POOL_CLIENT_ID>',
   oauthDomain: '<YOUR_COGNITO_DOMAIN>',
   oauthRedirectSignIn: 'http://localhost:4200/callback',
-  oauthRedirectSignOut: 'http://localhost:4200'
+  oauthRedirectSignOut: 'http://localhost:4200',
 };
 ```
 
@@ -71,7 +71,7 @@ export const environment = {
   userPoolClientId: '<YOUR_USER_POOL_CLIENT_ID>',
   oauthDomain: '<YOUR_COGNITO_DOMAIN>',
   oauthRedirectSignIn: 'https://<YOUR_PROD_DOMAIN>/callback',
-  oauthRedirectSignOut: 'https://<YOUR_PROD_DOMAIN>'
+  oauthRedirectSignOut: 'https://<YOUR_PROD_DOMAIN>',
 };
 ```
 
@@ -95,7 +95,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NgxSpinnerModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent {
   ngOnInit(): void {
@@ -106,7 +106,7 @@ export class AppComponent {
           userPoolClientId: environment.userPoolClientId,
           signUpVerificationMethod: 'code',
           userAttributes: {
-            email: { required: true }
+            email: { required: true },
           },
           loginWith: {
             oauth: {
@@ -114,11 +114,11 @@ export class AppComponent {
               scopes: ['email', 'openid'],
               redirectSignIn: [environment.oauthRedirectSignIn],
               redirectSignOut: [environment.oauthRedirectSignOut],
-              responseType: 'code'
-            }
-          }
-        }
-      }
+              responseType: 'code',
+            },
+          },
+        },
+      },
     });
   }
 }
@@ -136,7 +136,7 @@ import { Router } from '@angular/router';
 import { fetchAuthSession, signInWithRedirect } from 'aws-amplify/auth';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   constructor(private router: Router) {}
@@ -175,7 +175,10 @@ import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from './auth.service';
 
-export const authGuard: CanActivateFn = async (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+export const authGuard: CanActivateFn = async (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
   const authService = inject(AuthService);
 
   if (!(await authService.isAuthenticated())) {
@@ -205,7 +208,7 @@ import { AuthService } from '../auth.service';
   selector: 'app-sign-in',
   imports: [],
   templateUrl: './sign-in.component.html',
-  styleUrl: './sign-in.component.css'
+  styleUrl: './sign-in.component.css',
 })
 export class SignInComponent {
   constructor(private authService: AuthService) {}
@@ -233,7 +236,7 @@ import { AuthService } from '../auth.service';
   selector: 'app-auth-callback',
   imports: [],
   templateUrl: './auth-callback.component.html',
-  styleUrl: './auth-callback.component.css'
+  styleUrl: './auth-callback.component.css',
 })
 export class AuthCallbackComponent {
   constructor(private authService: AuthService) {}
@@ -271,7 +274,7 @@ export const routes: Routes = [
   { path: 'static-page', component: StaticPageComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'feature', component: FeatureOneComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: '/', pathMatch: 'full' }
+  { path: '**', redirectTo: '/', pathMatch: 'full' },
 ];
 ```
 
@@ -304,8 +307,8 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([])),
-    provideAnimations()
-  ]
+    provideAnimations(),
+  ],
 };
 ```
 
@@ -347,12 +350,21 @@ If the project includes a loading spinner, a functional interceptor handles show
 **`src/app/spinner.interceptor.ts`**
 
 ```typescript
-import { HttpErrorResponse, HttpEventType, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpEventType,
+  HttpHandlerFn,
+  HttpInterceptorFn,
+  HttpRequest,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { catchError, tap, throwError } from 'rxjs';
 
-export const spinnerInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+export const spinnerInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+) => {
   const spinner = inject(NgxSpinnerService);
   spinner.show();
   return next(req).pipe(
@@ -364,7 +376,7 @@ export const spinnerInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>,
     catchError((error: HttpErrorResponse) => {
       spinner.hide();
       return throwError(() => error);
-    })
+    }),
   );
 };
 ```
