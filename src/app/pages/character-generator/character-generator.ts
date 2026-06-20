@@ -19,14 +19,10 @@ function generateChars(chars: string, length: number): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4">
-      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block"
-        >← All tools</a
-      >
+      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Character Generator</h2>
-      <p class="text-gray-500 text-sm mb-5">
-        Generate a random string with configurable length and character sets.
-      </p>
+      <p class="text-gray-500 text-sm mb-5">Generate a random string with configurable length and character sets.</p>
 
       <div class="mb-5 space-y-5">
         <div class="flex items-center gap-3">
@@ -111,7 +107,7 @@ function generateChars(chars: string, length: number): string {
         </button>
       </div>
     </main>
-  `,
+  `
 })
 export class CharacterGenerator {
   readonly length = signal(12);

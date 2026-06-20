@@ -21,19 +21,10 @@ const ONES = [
   'sixteen',
   'seventeen',
   'eighteen',
-  'nineteen',
+  'nineteen'
 ];
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-const SCALES = [
-  '',
-  'thousand',
-  'million',
-  'billion',
-  'trillion',
-  'quadrillion',
-  'quintillion',
-  'sextillion',
-];
+const SCALES = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion', 'sextillion'];
 
 function groupToWords(n: number): string {
   if (n === 0) return '';
@@ -120,14 +111,10 @@ interface FormatterResult {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4">
-      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block"
-        >← All tools</a
-      >
+      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Number Formatter</h2>
-      <p class="text-gray-500 text-sm mb-6">
-        Format a number with comma separators and convert it to English words.
-      </p>
+      <p class="text-gray-500 text-sm mb-6">Format a number with comma separators and convert it to English words.</p>
 
       <div class="mb-6">
         <label class="block text-xs font-medium text-gray-600 mb-1">Number</label>
@@ -206,7 +193,7 @@ interface FormatterResult {
         </table>
       </div>
     </main>
-  `,
+  `
 })
 export class NumberFormatter {
   readonly input = signal('');
