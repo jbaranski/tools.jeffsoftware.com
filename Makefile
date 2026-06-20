@@ -3,7 +3,7 @@
 all: lint build
 
 lint:
-	npm run format
+	npm run prettier:check
 
 build:
 	npm run build
