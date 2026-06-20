@@ -1,4 +1,16 @@
-.PHONY: sync-plugins
+.PHONY: all build lint deploy sync-plugins
+
+all: lint build
+
+lint:
+	npm run format
+
+build:
+	npm run build
+
+# netlify-cli is NOT added as a devDependency -- npx downloads it at deploy time.
+deploy: build
+	npx netlify-cli deploy --prod --dir=dist/tools/browser
 
 sync-plugins:
 	@mkdir -p .claude/plugins
