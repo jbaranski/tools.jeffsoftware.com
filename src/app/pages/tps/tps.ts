@@ -21,7 +21,7 @@ const ONES = [
   'sixteen',
   'seventeen',
   'eighteen',
-  'nineteen',
+  'nineteen'
 ];
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const SCALE = ['', 'thousand', 'million', 'billion', 'trillion', 'quadrillion', 'quintillion'];
@@ -102,7 +102,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
   second: 1,
   minute: 60,
   hour: 3600,
-  day: 86400,
+  day: 86400
 };
 
 @Component({
@@ -111,14 +111,12 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mt-4 max-w-2xl">
-      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block"
-        >← All tools</a
-      >
+      <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">TPS Calculator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Enter a count and the time window it occurred in. See the throughput per second, minute,
-        hour, and day -- as a number and in words.
+        Enter a count and the time window it occurred in. See the throughput per second, minute, hour, and day -- as a
+        number and in words.
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-8">
@@ -136,9 +134,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide"
-            >Per (quantity)</label
-          >
+          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Per (quantity)</label>
           <input
             type="number"
             min="1"
@@ -170,9 +166,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
             <tr class="bg-gray-50 border-b border-gray-200">
               <th class="text-left px-4 py-3 font-semibold text-gray-600 w-28">Per</th>
               <th class="text-right px-4 py-3 font-semibold text-gray-600">Value</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">
-                In words
-              </th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">In words</th>
               <th class="px-4 py-3 w-20">
                 <button
                   (click)="copyAll()"
@@ -218,7 +212,7 @@ const UNIT_SECONDS: Record<TimeUnit, number> = {
         </table>
       </div>
     </main>
-  `,
+  `
 })
 export class TpsCalculator {
   readonly count = signal<number | null>(null);
@@ -243,7 +237,7 @@ export class TpsCalculator {
       { label: 'second', multiplier: 1 },
       { label: 'minute', multiplier: 60 },
       { label: 'hour', multiplier: 3600 },
-      { label: 'day', multiplier: 86400 },
+      { label: 'day', multiplier: 86400 }
     ];
 
     return intervals.map(({ label, multiplier }) => {

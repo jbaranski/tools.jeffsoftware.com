@@ -7,6 +7,6 @@ import { Footer } from './components/footer/footer';
   selector: 'app-root',
   imports: [RouterOutlet, Header, Footer],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './app.html',
+  templateUrl: './app.html'
 })
 export class App {}
