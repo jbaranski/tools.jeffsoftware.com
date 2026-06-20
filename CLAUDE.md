@@ -1,6 +1,6 @@
 # Project: tools.jeffsoftware.com
 
-Angular 21 + Tailwind CSS v4 client-only app hosted on Netlify.
+Angular 22 + Tailwind CSS v4 client-only app hosted on Netlify.
 
 ## Rules
 
