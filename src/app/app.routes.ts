@@ -8,5 +8,9 @@ export const routes: Routes = [
   { path: '', component: Home },
   { path: 'character-generator', component: CharacterGenerator },
   { path: 'number-formatter', component: NumberFormatter },
-  { path: 'tps', component: TpsCalculator }
+  { path: 'tps', component: TpsCalculator },
+  {
+    path: 'ical-viewer',
+    loadComponent: () => import('./pages/ical-viewer/ical-viewer').then((m) => m.ICalViewer)
+  }
 ];
