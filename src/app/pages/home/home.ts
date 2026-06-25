@@ -40,6 +40,11 @@ export class Home {
       name: 'Number Formatter',
       description: 'Format a number with comma separators and convert it to English words.',
       route: '/number-formatter'
+    },
+    {
+      name: 'iCal Viewer',
+      description: 'Paste .ics file content to view events in chronological order.',
+      route: '/ical-viewer'
     }
   ];
 }
