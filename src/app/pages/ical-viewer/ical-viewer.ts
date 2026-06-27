@@ -354,37 +354,48 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
         @if (error()) {
           <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
         }
-        @if (parsedText()) {
-          <p class="text-gray-400 text-xs mt-1">
-            Note: browsers normalize pasted text to LF line endings, so CRLF compliance (required by
-            <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
-              >RFC 5545</a
-            >
-            (iCal spec) section 3.1) cannot be validated here.
-          </p>
-        }
       </div>
 
-      @if (validationIssues().length > 0) {
-        <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
+      @if (parsedText()) {
+        <div
+          class="mb-6 rounded-r-lg border-l-4 border border-gray-200 bg-gray-50 px-4 py-3"
+          [class.border-l-red-400]="validationIssues().length > 0"
+          [class.border-l-green-400]="validationIssues().length === 0"
+        >
           <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
             <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
               >RFC 5545</a
             >
-            (iCal spec) -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
+            (iCal spec) validation
           </p>
           <ul class="space-y-1">
+            @if (validationIssues().length === 0) {
+              <li class="flex items-start gap-2 text-xs">
+                <span class="shrink-0 font-semibold text-green-600">Pass</span>
+                <span class="text-gray-600">No issues found.</span>
+              </li>
+            }
             @for (issue of validationIssues(); track $index) {
               <li class="flex items-start gap-2 text-xs">
                 <span
                   class="shrink-0 font-semibold"
-                  [class]="issue.severity === 'error' ? 'text-red-500' : 'text-gray-500'"
+                  [class]="issue.severity === 'error' ? 'text-red-500' : 'text-amber-500'"
                 >
                   {{ issue.severity === 'error' ? 'Error' : 'Warning' }}
                 </span>
                 <span class="text-gray-600">{{ issue.message }}</span>
               </li>
             }
+            <li class="flex items-start gap-2 text-xs mt-2 pt-2 border-t border-gray-200">
+              <span class="shrink-0 font-semibold text-gray-400">Note</span>
+              <span class="text-gray-400">
+                Browsers normalize pasted text to LF line endings, so CRLF compliance (required by
+                <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+                  >RFC 5545</a
+                >
+                section 3.1) cannot be validated here.
+              </span>
+            </li>
           </ul>
         </div>
       }
