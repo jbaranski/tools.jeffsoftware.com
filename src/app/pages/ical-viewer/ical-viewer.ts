@@ -11,21 +11,6 @@ interface ValidationIssue {
 function validateRfc5545(raw: string): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
-  // Check CRLF line endings
-  const hasCrlf = raw.includes('\r\n');
-  const hasBareLf = /(?<!\r)\n/.test(raw);
-  if (!hasCrlf && hasBareLf) {
-    issues.push({
-      severity: 'warning',
-      message: 'RFC 5545 requires CRLF (\\r\\n) line endings, but only LF (\\n) line endings were found.'
-    });
-  } else if (hasCrlf && hasBareLf) {
-    issues.push({
-      severity: 'warning',
-      message: 'Mixed line endings detected. RFC 5545 requires consistent CRLF (\\r\\n) line endings.'
-    });
-  }
-
   // Unfold lines for further analysis (replace CRLF+space or LF+space with nothing)
   const unfolded = raw.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
   const lines = unfolded.split(/\r\n|\r|\n/);
@@ -345,9 +330,9 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
           target="_blank"
           rel="noopener"
           class="text-blue-500 hover:underline"
-          >RFC 5545 (iCal spec)</a
+          >RFC 5545</a
         >
-        -- issues are reported below the input.
+        (iCal spec) -- issues are reported below the input.
       </p>
 
       <div class="mb-6">
@@ -369,9 +354,9 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
         <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
           <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
             <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
-              >RFC 5545 (iCal spec)</a
+              >RFC 5545</a
             >
-            -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
+            (iCal spec) -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
           </p>
           <ul class="space-y-1">
             @for (issue of validationIssues(); track $index) {
