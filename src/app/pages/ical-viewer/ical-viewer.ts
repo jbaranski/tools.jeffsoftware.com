@@ -358,11 +358,9 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
       </div>
 
       @if (validationIssues().length > 0) {
-        <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-          <p class="text-xs font-semibold text-amber-700 mb-2">
-            RFC 5545 validation -- {{ validationIssues().length }} issue{{
-              validationIssues().length === 1 ? '' : 's'
-            }}
+        <div class="mb-6 rounded-lg border border-gray-200 px-4 py-3">
+          <p class="text-xs font-semibold text-gray-600 mb-2">
+            RFC 5545 validation -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }}
             found
           </p>
           <ul class="space-y-1">
@@ -370,11 +368,11 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
               <li class="flex items-start gap-2 text-xs">
                 <span
                   class="shrink-0 font-semibold"
-                  [class]="issue.severity === 'error' ? 'text-red-600' : 'text-amber-600'"
+                  [class]="issue.severity === 'error' ? 'text-red-500' : 'text-gray-500'"
                 >
                   {{ issue.severity === 'error' ? 'Error' : 'Warning' }}
                 </span>
-                <span class="text-gray-700">{{ issue.message }}</span>
+                <span class="text-gray-600">{{ issue.message }}</span>
               </li>
             }
           </ul>
