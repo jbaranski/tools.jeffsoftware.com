@@ -3,6 +3,229 @@ import { Component, ChangeDetectionStrategy, signal, computed, Pipe, PipeTransfo
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
+interface ValidationIssue {
+  severity: 'error' | 'warning';
+  message: string;
+}
+
+function validateRfc5545(raw: string): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+
+  // Check CRLF line endings
+  const hasCrlf = raw.includes('\r\n');
+  const hasBareLf = /(?<!\r)\n/.test(raw);
+  if (!hasCrlf && hasBareLf) {
+    issues.push({
+      severity: 'warning',
+      message: 'RFC 5545 requires CRLF (\\r\\n) line endings, but only LF (\\n) line endings were found.'
+    });
+  } else if (hasCrlf && hasBareLf) {
+    issues.push({
+      severity: 'warning',
+      message: 'Mixed line endings detected. RFC 5545 requires consistent CRLF (\\r\\n) line endings.'
+    });
+  }
+
+  // Unfold lines for further analysis (replace CRLF+space or LF+space with nothing)
+  const unfolded = raw.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
+  const lines = unfolded.split(/\r\n|\r|\n/);
+
+  // Check line length (75 octets max before folding)
+  const foldedLines = raw.split(/\r\n|\r|\n/);
+  for (let i = 0; i < foldedLines.length; i++) {
+    const bytes = new TextEncoder().encode(foldedLines[i]).length;
+    if (bytes > 75) {
+      issues.push({
+        severity: 'warning',
+        message: `Line ${i + 1} exceeds 75 octets (${bytes} octets). RFC 5545 requires long lines to be folded.`
+      });
+      break; // report only the first occurrence to avoid flooding
+    }
+  }
+
+  // Must start with BEGIN:VCALENDAR
+  if (!lines[0]?.match(/^BEGIN:VCALENDAR$/i)) {
+    issues.push({ severity: 'error', message: 'File must begin with "BEGIN:VCALENDAR".' });
+  }
+
+  // Must end with END:VCALENDAR (ignoring trailing blank lines)
+  const lastNonEmpty = [...lines].reverse().find((l) => l.trim() !== '');
+  if (lastNonEmpty && !lastNonEmpty.match(/^END:VCALENDAR$/i)) {
+    issues.push({ severity: 'error', message: 'File must end with "END:VCALENDAR".' });
+  }
+
+  // Check required VCALENDAR properties
+  const vcalProps = new Set<string>();
+  let inVcal = false;
+  let depth = 0;
+  for (const line of lines) {
+    if (/^BEGIN:VCALENDAR$/i.test(line)) {
+      inVcal = true;
+      depth = 1;
+      continue;
+    }
+    if (!inVcal) continue;
+    if (/^BEGIN:/i.test(line)) {
+      depth++;
+      continue;
+    }
+    if (/^END:/i.test(line)) {
+      depth--;
+      if (depth === 0) break;
+      continue;
+    }
+    if (depth === 1) {
+      const m = line.match(/^([A-Z-]+)/i);
+      if (m) vcalProps.add(m[1].toUpperCase());
+    }
+  }
+  if (!vcalProps.has('PRODID')) {
+    issues.push({ severity: 'error', message: 'VCALENDAR is missing the required PRODID property.' });
+  }
+  if (!vcalProps.has('VERSION')) {
+    issues.push({ severity: 'error', message: 'VCALENDAR is missing the required VERSION property.' });
+  } else {
+    const versionLine = lines.find((l) => /^VERSION:/i.test(l));
+    if (versionLine && !versionLine.match(/^VERSION:2\.0$/i)) {
+      issues.push({
+        severity: 'warning',
+        message: `VERSION should be "2.0" per RFC 5545. Found: "${versionLine.split(':').slice(1).join(':')}"`
+      });
+    }
+  }
+
+  // Validate each VEVENT
+  let inVevent = false;
+  let veventProps = new Map<string, string[]>();
+  const seenUids = new Map<string, number>();
+  let veventCount = 0;
+
+  for (const line of lines) {
+    if (/^BEGIN:VEVENT$/i.test(line)) {
+      inVevent = true;
+      veventProps = new Map();
+      veventCount++;
+      continue;
+    }
+    if (/^END:VEVENT$/i.test(line)) {
+      inVevent = false;
+      const label = `VEVENT #${veventCount}`;
+
+      // UID required
+      if (!veventProps.has('UID')) {
+        issues.push({ severity: 'error', message: `${label} is missing the required UID property.` });
+      } else {
+        const uid = veventProps.get('UID')![0];
+        seenUids.set(uid, (seenUids.get(uid) ?? 0) + 1);
+      }
+
+      // DTSTART required
+      if (!veventProps.has('DTSTART')) {
+        issues.push({ severity: 'error', message: `${label} is missing the required DTSTART property.` });
+      }
+
+      // Must not have both DTEND and DURATION
+      if (veventProps.has('DTEND') && veventProps.has('DURATION')) {
+        issues.push({ severity: 'error', message: `${label} must not specify both DTEND and DURATION.` });
+      }
+
+      // DTEND must not be earlier than DTSTART
+      if (veventProps.has('DTSTART') && veventProps.has('DTEND')) {
+        const parseDate = (s: string) => {
+          // strip VALUE=DATE: prefix or similar params
+          const val = s.replace(/^.*:/, '');
+          // basic parse: YYYYMMDDTHHMMSSZ or YYYYMMDD
+          if (/^\d{8}T\d{6}Z?$/.test(val)) {
+            return new Date(
+              `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}T${val.slice(9, 11)}:${val.slice(11, 13)}:${val.slice(13, 15)}Z`
+            );
+          }
+          if (/^\d{8}$/.test(val)) {
+            return new Date(`${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`);
+          }
+          return null;
+        };
+        const start = parseDate(veventProps.get('DTSTART')![0]);
+        const end = parseDate(veventProps.get('DTEND')![0]);
+        if (start && end && end < start) {
+          issues.push({ severity: 'error', message: `${label} has DTEND before DTSTART.` });
+        }
+      }
+
+      // Check for unknown/non-standard property names (informational)
+      const knownProps = new Set([
+        'CLASS',
+        'CREATED',
+        'DESCRIPTION',
+        'DTSTART',
+        'GEO',
+        'LAST-MODIFIED',
+        'LOCATION',
+        'ORGANIZER',
+        'PRIORITY',
+        'DTSTAMP',
+        'SEQUENCE',
+        'STATUS',
+        'SUMMARY',
+        'TRANSP',
+        'UID',
+        'URL',
+        'RECURRENCE-ID',
+        'RRULE',
+        'DTEND',
+        'DURATION',
+        'ATTACH',
+        'ATTENDEE',
+        'CATEGORIES',
+        'COMMENT',
+        'CONTACT',
+        'EXDATE',
+        'RSTATUS',
+        'RELATED',
+        'RESOURCES',
+        'RDATE',
+        'EXRULE',
+        'X-'
+      ]);
+      for (const prop of veventProps.keys()) {
+        if (!prop.startsWith('X-') && !knownProps.has(prop)) {
+          issues.push({
+            severity: 'warning',
+            message: `${label} uses non-standard property "${prop}". RFC 5545 requires custom properties to be prefixed with "X-".`
+          });
+        }
+      }
+
+      continue;
+    }
+    if (inVevent) {
+      const m = line.match(/^([A-Z-]+)(?:[;:](.*))?$/i);
+      if (m) {
+        const key = m[1].toUpperCase();
+        const val = m[2] ?? '';
+        if (!veventProps.has(key)) veventProps.set(key, []);
+        veventProps.get(key)!.push(val);
+      }
+    }
+  }
+
+  // Duplicate UIDs (different from RECURRENCE-ID-based recurrences)
+  for (const [uid, count] of seenUids.entries()) {
+    if (count > 1) {
+      issues.push({
+        severity: 'warning',
+        message: `UID "${uid}" appears ${count} times. Duplicate UIDs are only valid for recurring event overrides (RECURRENCE-ID).`
+      });
+    }
+  }
+
+  if (veventCount === 0) {
+    issues.push({ severity: 'warning', message: 'No VEVENT components found in the calendar.' });
+  }
+
+  return issues;
+}
+
 interface CalEvent {
   uid: string;
   summary: string;
@@ -115,7 +338,9 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer</h2>
-      <p class="text-gray-500 text-sm mb-6">Paste .ics file content to view events in chronological order.</p>
+      <p class="text-gray-500 text-sm mb-6">
+        Paste .ics file content to view events in chronological order. RFC 5545 issues are reported below the input.
+      </p>
 
       <div class="mb-6">
         <label class="block text-xs font-medium text-gray-600 mb-1">iCal content</label>
@@ -131,6 +356,27 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
           <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
         }
       </div>
+
+      @if (validationIssues().length > 0) {
+        <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
+          <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+            RFC 5545 -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
+          </p>
+          <ul class="space-y-1">
+            @for (issue of validationIssues(); track $index) {
+              <li class="flex items-start gap-2 text-xs">
+                <span
+                  class="shrink-0 font-semibold"
+                  [class]="issue.severity === 'error' ? 'text-red-500' : 'text-gray-500'"
+                >
+                  {{ issue.severity === 'error' ? 'Error' : 'Warning' }}
+                </span>
+                <span class="text-gray-600">{{ issue.message }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
 
       @if (groups().length > 0) {
         <p class="text-gray-500 text-sm mb-6">{{ totalCount() }} event{{ totalCount() === 1 ? '' : 's' }}</p>
@@ -175,6 +421,7 @@ export class ICalViewer {
   readonly rawInput = signal('');
   readonly parsedText = signal('');
   readonly error = signal('');
+  readonly validationIssues = signal<ValidationIssue[]>([]);
 
   readonly groups = computed<DateGroup[]>(() => {
     const text = this.parsedText();
@@ -197,15 +444,18 @@ export class ICalViewer {
     if (!text) {
       this.error.set('');
       this.parsedText.set('');
+      this.validationIssues.set([]);
       return;
     }
     try {
       ICAL.parse(text);
       this.error.set('');
       this.parsedText.set(text);
+      this.validationIssues.set(validateRfc5545(text));
     } catch {
       this.error.set('Invalid iCal content -- paste the full .ics file content.');
       this.parsedText.set('');
+      this.validationIssues.set([]);
     }
   }
 }
