@@ -19,7 +19,7 @@
     "@angular/common": "^22.0.3",
     "@angular/compiler": "^22.0.3",
     "@angular/core": "^22.0.3",
-    "@angular/forms": "^22.0.3",
+    "@angular/forms": "^22.0.4",
     "@angular/platform-browser": "^22.0.3",
     "@angular/router": "^22.0.3",
     "@fontsource/inter": "^5.2.8",
