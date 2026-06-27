@@ -337,9 +337,17 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
     <main class="mt-4">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
-      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer</h2>
+      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer + RFC 5545 Validator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Paste .ics file content to view events in chronological order. RFC 5545 issues are reported below the input.
+        Paste .ics file content to view events in chronological order. Validated against
+        <a
+          href="https://www.rfc-editor.org/rfc/rfc5545"
+          target="_blank"
+          rel="noopener"
+          class="text-blue-500 hover:underline"
+          >RFC 5545 (iCal spec)</a
+        >
+        -- issues are reported below the input.
       </p>
 
       <div class="mb-6">
@@ -360,7 +368,10 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
       @if (validationIssues().length > 0) {
         <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
           <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-            RFC 5545 -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
+            <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+              >RFC 5545 (iCal spec)</a
+            >
+            -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
           </p>
           <ul class="space-y-1">
             @for (issue of validationIssues(); track $index) {
