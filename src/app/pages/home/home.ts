@@ -42,7 +42,7 @@ export class Home {
       route: '/number-formatter'
     },
     {
-      name: 'iCal Viewer + RFC 5545 Validator',
+      name: 'iCal Viewer + RFC 5545 (iCal spec) Validator',
       description:
         'Paste .ics file content to view events in chronological order and validate against RFC 5545 (iCal spec).',
       route: '/ical-viewer'

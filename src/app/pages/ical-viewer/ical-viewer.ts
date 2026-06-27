@@ -322,7 +322,7 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
     <main class="mt-4">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
-      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer + RFC 5545 Validator</h2>
+      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer + RFC 5545 (iCal spec) Validator</h2>
       <p class="text-gray-500 text-sm mb-6">
         Paste .ics file content to view events in chronological order. Validated against
         <a
