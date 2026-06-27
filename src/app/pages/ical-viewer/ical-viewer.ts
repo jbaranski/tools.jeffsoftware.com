@@ -358,10 +358,9 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
       </div>
 
       @if (validationIssues().length > 0) {
-        <div class="mb-6 rounded-lg border border-gray-200 px-4 py-3">
-          <p class="text-xs font-semibold text-gray-600 mb-2">
-            RFC 5545 validation -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }}
-            found
+        <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
+          <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
+            RFC 5545 -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
           </p>
           <ul class="space-y-1">
             @for (issue of validationIssues(); track $index) {
