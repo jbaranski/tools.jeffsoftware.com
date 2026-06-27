@@ -20,7 +20,7 @@
     "@angular/compiler": "^22.0.3",
     "@angular/core": "^22.0.3",
     "@angular/forms": "^22.0.3",
-    "@angular/platform-browser": "^22.0.3",
+    "@angular/platform-browser": "^22.0.4",
     "@angular/router": "^22.0.3",
     "@fontsource/inter": "^5.2.8",
     "ical.js": "^2.2.1",
