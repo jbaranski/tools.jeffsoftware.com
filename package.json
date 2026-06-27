@@ -34,7 +34,7 @@
     "@angular/compiler-cli": "^22.0.3",
     "@tailwindcss/postcss": "^4.3.1",
     "postcss": "^8.5.3",
-    "prettier": "^3.8.4",
+    "prettier": "^3.9.0",
     "tailwindcss": "^4.3.1",
     "typescript": "~6.0.3"
   }
