@@ -22,7 +22,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
     if (bytes > 75) {
       issues.push({
         severity: 'warning',
-        message: `Line ${i + 1} exceeds 75 octets (${bytes} octets). RFC 5545 requires long lines to be folded.`
+        message: `Line ${i + 1} exceeds 75 octets (${bytes} octets). RFC 5545 (iCal spec) requires long lines to be folded.`
       });
       break; // report only the first occurrence to avoid flooding
     }
@@ -74,7 +74,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
     if (versionLine && !versionLine.match(/^VERSION:2\.0$/i)) {
       issues.push({
         severity: 'warning',
-        message: `VERSION should be "2.0" per RFC 5545. Found: "${versionLine.split(':').slice(1).join(':')}"`
+        message: `VERSION should be "2.0" per RFC 5545 (iCal spec). Found: "${versionLine.split(':').slice(1).join(':')}"`
       });
     }
   }
@@ -176,7 +176,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
         if (!prop.startsWith('X-') && !knownProps.has(prop)) {
           issues.push({
             severity: 'warning',
-            message: `${label} uses non-standard property "${prop}". RFC 5545 requires custom properties to be prefixed with "X-".`
+            message: `${label} uses non-standard property "${prop}". RFC 5545 (iCal spec) requires custom properties to be prefixed with "X-".`
           });
         }
       }
@@ -322,7 +322,13 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
     <main class="mt-4">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
-      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer + RFC 5545 (iCal spec) Validator</h2>
+      <h2 class="text-gray-800 text-2xl font-bold mb-1">
+        iCal Viewer +
+        <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+          >RFC 5545</a
+        >
+        (iCal spec) Validator
+      </h2>
       <p class="text-gray-500 text-sm mb-6">
         Paste .ics file content to view events in chronological order. Validated against
         <a
@@ -350,8 +356,11 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
         }
         @if (parsedText()) {
           <p class="text-gray-400 text-xs mt-1">
-            Note: browsers normalize pasted text to LF line endings, so CRLF compliance (required by RFC 5545 section
-            3.1) cannot be validated here.
+            Note: browsers normalize pasted text to LF line endings, so CRLF compliance (required by
+            <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+              >RFC 5545</a
+            >
+            (iCal spec) section 3.1) cannot be validated here.
           </p>
         }
       </div>
