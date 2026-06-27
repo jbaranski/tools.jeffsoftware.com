@@ -348,6 +348,10 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
         @if (error()) {
           <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
         }
+        <p class="text-gray-400 text-xs mt-1">
+          Note: browsers normalize pasted text to LF line endings, so CRLF compliance (required by RFC 5545 section 3.1)
+          cannot be validated here.
+        </p>
       </div>
 
       @if (validationIssues().length > 0) {
