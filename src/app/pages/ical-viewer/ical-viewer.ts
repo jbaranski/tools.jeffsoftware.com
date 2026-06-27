@@ -11,21 +11,6 @@ interface ValidationIssue {
 function validateRfc5545(raw: string): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
-  // Check CRLF line endings
-  const hasCrlf = raw.includes('\r\n');
-  const hasBareLf = /(?<!\r)\n/.test(raw);
-  if (!hasCrlf && hasBareLf) {
-    issues.push({
-      severity: 'warning',
-      message: 'RFC 5545 requires CRLF (\\r\\n) line endings, but only LF (\\n) line endings were found.'
-    });
-  } else if (hasCrlf && hasBareLf) {
-    issues.push({
-      severity: 'warning',
-      message: 'Mixed line endings detected. RFC 5545 requires consistent CRLF (\\r\\n) line endings.'
-    });
-  }
-
   // Unfold lines for further analysis (replace CRLF+space or LF+space with nothing)
   const unfolded = raw.replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '');
   const lines = unfolded.split(/\r\n|\r|\n/);
@@ -37,7 +22,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
     if (bytes > 75) {
       issues.push({
         severity: 'warning',
-        message: `Line ${i + 1} exceeds 75 octets (${bytes} octets). RFC 5545 requires long lines to be folded.`
+        message: `Line ${i + 1} exceeds 75 octets (${bytes} octets). RFC 5545 (iCal spec) requires long lines to be folded.`
       });
       break; // report only the first occurrence to avoid flooding
     }
@@ -89,7 +74,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
     if (versionLine && !versionLine.match(/^VERSION:2\.0$/i)) {
       issues.push({
         severity: 'warning',
-        message: `VERSION should be "2.0" per RFC 5545. Found: "${versionLine.split(':').slice(1).join(':')}"`
+        message: `VERSION should be "2.0" per RFC 5545 (iCal spec). Found: "${versionLine.split(':').slice(1).join(':')}"`
       });
     }
   }
@@ -191,7 +176,7 @@ function validateRfc5545(raw: string): ValidationIssue[] {
         if (!prop.startsWith('X-') && !knownProps.has(prop)) {
           issues.push({
             severity: 'warning',
-            message: `${label} uses non-standard property "${prop}". RFC 5545 requires custom properties to be prefixed with "X-".`
+            message: `${label} uses non-standard property "${prop}". RFC 5545 (iCal spec) requires custom properties to be prefixed with "X-".`
           });
         }
       }
@@ -337,9 +322,23 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
     <main class="mt-4">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
-      <h2 class="text-gray-800 text-2xl font-bold mb-1">iCal Viewer</h2>
+      <h2 class="text-gray-800 text-2xl font-bold mb-1">
+        iCal Viewer +
+        <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+          >RFC 5545</a
+        >
+        (iCal spec) Validator
+      </h2>
       <p class="text-gray-500 text-sm mb-6">
-        Paste .ics file content to view events in chronological order. RFC 5545 issues are reported below the input.
+        Paste .ics file content to view events in chronological order. Validated against
+        <a
+          href="https://www.rfc-editor.org/rfc/rfc5545"
+          target="_blank"
+          rel="noopener"
+          class="text-blue-500 hover:underline"
+          >RFC 5545</a
+        >
+        (iCal spec) -- issues are reported below the input.
       </p>
 
       <div class="mb-6">
@@ -355,12 +354,24 @@ function groupByDate(events: CalEvent[]): DateGroup[] {
         @if (error()) {
           <p class="text-red-500 text-xs mt-1">{{ error() }}</p>
         }
+        @if (parsedText()) {
+          <p class="text-gray-400 text-xs mt-1">
+            Note: browsers normalize pasted text to LF line endings, so CRLF compliance (required by
+            <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+              >RFC 5545</a
+            >
+            (iCal spec) section 3.1) cannot be validated here.
+          </p>
+        }
       </div>
 
       @if (validationIssues().length > 0) {
         <div class="mb-6 rounded-r-lg border-l-4 border-l-red-400 border border-gray-200 bg-gray-50 px-4 py-3">
           <p class="text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-            RFC 5545 -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
+            <a href="https://www.rfc-editor.org/rfc/rfc5545" target="_blank" rel="noopener" class="hover:underline"
+              >RFC 5545</a
+            >
+            (iCal spec) -- {{ validationIssues().length }} issue{{ validationIssues().length === 1 ? '' : 's' }} found
           </p>
           <ul class="space-y-1">
             @for (issue of validationIssues(); track $index) {
