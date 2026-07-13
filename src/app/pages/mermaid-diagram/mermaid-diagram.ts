@@ -38,6 +38,9 @@ interface DragState {
   selector: 'app-mermaid-diagram',
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'exitFullscreen()'
+  },
   template: `
     <main class="mt-4">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
@@ -88,7 +91,7 @@ interface DragState {
         </div>
       }
 
-      <div class="mb-6 flex items-center gap-2">
+      <div [class]="toolbarClasses()">
         <button
           (click)="zoomOut()"
           class="w-7 h-7 border border-gray-300 hover:border-gray-400 text-gray-600 text-sm font-medium rounded cursor-pointer transition-colors"
@@ -108,11 +111,18 @@ interface DragState {
           Reset view
         </button>
         <span class="text-xs text-gray-400">{{ zoomPercent() }}</span>
+        <button
+          (click)="toggleFullscreen()"
+          class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors"
+        >
+          {{ isFullscreen() ? 'Exit full screen' : 'Full screen' }}
+        </button>
       </div>
 
       <div
         #canvasContainer
-        class="relative border border-gray-200 rounded-xl overflow-hidden bg-gray-50 h-[70vh] touch-none select-none"
+        [class]="canvasClasses()"
+        class="overflow-hidden touch-none select-none"
         [class.cursor-grabbing]="isPanning()"
         [class.cursor-grab]="!isPanning()"
         (wheel)="onWheel($event)"
@@ -125,7 +135,7 @@ interface DragState {
           <div class="absolute top-0 left-0 origin-top-left" [style.transform]="transform()" [innerHTML]="svg"></div>
         } @else if (!renderError()) {
           <p class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-            Enter a diagram above to see it rendered here.
+            Enter a Mermaid diagram to see it rendered here.
           </p>
         }
       </div>
@@ -146,6 +156,7 @@ export class MermaidDiagram {
   readonly renderError = signal<string | null>(null);
   readonly isFormCollapsed = signal(false);
   readonly isPanning = signal(false);
+  readonly isFullscreen = signal(false);
 
   readonly scale = signal(1);
   readonly panX = signal(0);
@@ -153,6 +164,18 @@ export class MermaidDiagram {
 
   readonly transform = computed(() => `translate(${this.panX()}px, ${this.panY()}px) scale(${this.scale()})`);
   readonly zoomPercent = computed(() => `${Math.round(this.scale() * 100)}%`);
+
+  readonly toolbarClasses = computed(() =>
+    this.isFullscreen()
+      ? 'fixed top-4 left-4 z-[60] flex items-center gap-2 bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2'
+      : 'mb-6 flex items-center gap-2'
+  );
+
+  readonly canvasClasses = computed(() =>
+    this.isFullscreen()
+      ? 'fixed inset-0 z-50 bg-gray-50'
+      : 'relative border border-gray-200 rounded-xl bg-gray-50 h-[70vh]'
+  );
 
   constructor() {
     void this.renderDiagram(this.diagramText());
@@ -173,6 +196,14 @@ export class MermaidDiagram {
 
   onInput(event: Event): void {
     this.diagramText.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen.update((value) => !value);
+  }
+
+  exitFullscreen(): void {
+    this.isFullscreen.set(false);
   }
 
   async renderDiagram(text: string): Promise<void> {
