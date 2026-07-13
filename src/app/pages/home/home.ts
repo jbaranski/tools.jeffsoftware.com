@@ -46,6 +46,11 @@ export class Home {
       description:
         'Paste .ics file content to view events in chronological order and validate against RFC 5545 (iCal spec).',
       route: '/ical-viewer'
+    },
+    {
+      name: 'Mermaid Diagram Viewer',
+      description: 'Paste Mermaid diagram syntax to render it live, with pan and zoom on the canvas.',
+      route: '/mermaid-diagram'
     }
   ];
 }

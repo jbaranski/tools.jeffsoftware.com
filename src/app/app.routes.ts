@@ -12,5 +12,9 @@ export const routes: Routes = [
   {
     path: 'ical-viewer',
     loadComponent: () => import('./pages/ical-viewer/ical-viewer').then((m) => m.ICalViewer)
+  },
+  {
+    path: 'mermaid-diagram',
+    loadComponent: () => import('./pages/mermaid-diagram/mermaid-diagram').then((m) => m.MermaidDiagram)
   }
 ];
