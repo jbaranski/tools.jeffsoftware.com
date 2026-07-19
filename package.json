@@ -16,12 +16,12 @@
   "private": true,
   "packageManager": "npm@10.9.7",
   "dependencies": {
-    "@angular/common": "^22.0.6",
-    "@angular/compiler": "^22.0.6",
-    "@angular/core": "^22.0.6",
-    "@angular/forms": "^22.0.6",
-    "@angular/platform-browser": "^22.0.6",
-    "@angular/router": "^22.0.6",
+    "@angular/common": "^22.0.7",
+    "@angular/compiler": "^22.0.7",
+    "@angular/core": "^22.0.7",
+    "@angular/forms": "^22.0.7",
+    "@angular/platform-browser": "^22.0.7",
+    "@angular/router": "^22.0.7",
     "@fontsource/inter": "^5.2.8",
     "ical.js": "^2.2.1",
     "mermaid": "^11.16.0",
@@ -29,13 +29,13 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.0.6",
-    "@angular/cli": "^22.0.6",
-    "@angular/compiler-cli": "^22.0.6",
-    "@tailwindcss/postcss": "^4.3.2",
-    "postcss": "^8.5.16",
+    "@angular/build": "^22.0.7",
+    "@angular/cli": "^22.0.7",
+    "@angular/compiler-cli": "^22.0.7",
+    "@tailwindcss/postcss": "^4.3.3",
+    "postcss": "^8.5.19",
     "prettier": "^3.9.5",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3"
   }
 }
