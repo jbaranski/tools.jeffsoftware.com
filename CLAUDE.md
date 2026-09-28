@@ -42,16 +42,24 @@ Never use the -- character (em dash). Always use -- (two hyphens) instead, in al
 
 ### CSP script-src hash
 
-`netlify.toml` has a `'unsafe-hashes'` + SHA-256 hash in `script-src` for the inline event handler Angular emits on its deferred stylesheet link:
+`netlify.toml` has a SHA-256 hash in `script-src` for the inline `<script>` block that Angular's build (via Beasties) emits to swap in the deferred stylesheet:
 
 ```html
-<link rel="stylesheet" href="..." media="print" onload="this.media='all'" />
+<link rel="stylesheet" href="..." media="print" data-beasties-media="all" />
+<script>
+  document.querySelectorAll('link[data-beasties-media]').forEach(function (l) {
+    l.media = l.getAttribute('data-beasties-media');
+    l.removeAttribute('data-beasties-media');
+  });
+</script>
 ```
 
-The hash covers the attribute value `this.media='all'` and does NOT change between builds (the filename changes, the handler string does not). If a future Angular upgrade changes that string (e.g. to `this.media='screen'`), the browser will show a CSP error and the hash in `netlify.toml` must be recomputed:
+As of the Angular 22.2.0 upgrade, Beasties switched from an inline `onload="this.media='all'"` event-handler attribute (needing `'unsafe-hashes'`) to this standalone inline `<script>` block, so the CSP no longer needs `'unsafe-hashes'` -- a plain `'sha256-...'` hash of the script's exact literal text is enough.
+
+The hash covers the exact literal bytes between `<script>` and `</script>` (minified to one line, no trailing newline) and does NOT change between builds (the filename changes, the script text does not). If a future Angular upgrade changes that script's text, the browser will show a CSP error and the hash in `netlify.toml` must be recomputed. Extract the literal script content from the built `dist/tools/browser/index.html` first (do not hand-retype it -- whitespace differences change the hash), then:
 
 ```
-printf "new.handler.string" | openssl dgst -sha256 -binary | base64
+printf '%s' "$SCRIPT_CONTENT" | openssl dgst -sha256 -binary | base64
 ```
 
 Then update the `'sha256-...'` value in the `Content-Security-Policy` header.
