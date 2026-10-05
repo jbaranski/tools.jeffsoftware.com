@@ -1,6 +1,6 @@
 # tools.jeffsoftware.com
 
-Use(ful)(less) tools
+Simple web based software development utilities that help me with my day to day work.
 
 All vibe coded... inspired by [tools.simonwillison.net](https://tools.simonwillison.net/).
 
