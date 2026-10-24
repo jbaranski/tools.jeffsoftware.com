@@ -32,6 +32,12 @@ export class Home {
       route: '/tps'
     },
     {
+      name: 'Byte Size Calculator',
+      description:
+        'Convert a size times a multiplier into bytes, KB, MB, GB, TB, and PB, with a quick reference table.',
+      route: '/byte-size'
+    },
+    {
       name: 'Character Generator',
       description: 'Generate a random string with configurable length and character sets.',
       route: '/character-generator'
