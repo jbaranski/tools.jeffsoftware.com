@@ -34,7 +34,7 @@ export class Home {
     {
       name: 'Byte Size Calculator',
       description:
-        'Convert a size times a multiplier into bytes, KB, MB, GB, TB, and PB, with a quick reference table.',
+        'Estimate storage from a record size or a pasted sample payload times a record count, from bytes to petabytes.',
       route: '/byte-size'
     },
     {

@@ -72,6 +72,11 @@ const COMPARISONS: { singular: string; plural: string; bytes: number; each: stri
   { singular: 'large hard drive', plural: 'large hard drives', bytes: 2e13, each: '20 TB' }
 ];
 
+// Record counts for the "at scale" ladder
+const SCALE_COUNTS: { label: string; count: number }[] = [{ label: '1K', count: 1e3 }, ...REFERENCE_COUNTS];
+
+const UTF8 = new TextEncoder();
+
 const SHORTHAND: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 };
 
 function parseMultiplier(text: string): number | null {
@@ -108,6 +113,23 @@ function humanize(bytes: number): { value: string; unit: string } {
   };
 }
 
+function humanizeText(bytes: number): string {
+  const { value, unit } = humanize(bytes);
+  return `${value} ${unit}`;
+}
+
+function unitColor(unit: string): string {
+  return UNIT_COLORS[unit] ?? 'bg-gray-50 text-gray-500';
+}
+
+function minifiedJsonBytes(text: string): number | null {
+  try {
+    return UTF8.encode(JSON.stringify(JSON.parse(text))).length;
+  } catch {
+    return null;
+  }
+}
+
 function multiplierWords(n: number): string {
   if (n < 1000) return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
   return n.toLocaleString('en-US', { notation: 'compact', compactDisplay: 'long', maximumFractionDigits: 2 });
@@ -142,62 +164,117 @@ interface SizeRow {
       <div>
         <h2 class="text-gray-800 text-2xl font-bold mb-1">Byte Size Calculator</h2>
         <p class="text-gray-500 text-sm">
-          How much space will it take? Enter a record size and how many records you have.
+          How much space will it take? Enter a record size (or paste a sample payload) and how many records you have.
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="flex flex-col gap-1 flex-1">
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Size</label>
-          <input
-            type="number"
-            min="0"
-            [value]="size() ?? ''"
-            (input)="onSizeChange($event)"
-            placeholder="e.g. 10"
-            class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
-          />
+      <div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          @if (payloadActive()) {
+            <div class="flex flex-col gap-1 flex-1">
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Size (from sample)</label>
+              <div class="px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-800 text-sm">
+                {{ recordBytesText() }}
+                <span class="text-gray-400">· {{ recordBytesExact() }} bytes</span>
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-1 flex-1">
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Size</label>
+              <input
+                type="number"
+                min="0"
+                [value]="size() ?? ''"
+                (input)="onSizeChange($event)"
+                placeholder="e.g. 10"
+                class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+              />
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Unit</label>
+              <select
+                (change)="onUnitChange($event)"
+                class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white"
+              >
+                <optgroup label="Decimal (1000)">
+                  @for (u of decimalUnits; track u) {
+                    <option [value]="u" [selected]="u === unit()">{{ u }}</option>
+                  }
+                </optgroup>
+                <optgroup label="Binary (1024)">
+                  @for (u of binaryUnits; track u) {
+                    <option [value]="u" [selected]="u === unit()">{{ u }}</option>
+                  }
+                </optgroup>
+              </select>
+            </div>
+          }
+
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">× How many</label>
+            <input
+              type="text"
+              inputmode="decimal"
+              [value]="multiplierText()"
+              (input)="onMultiplierChange($event)"
+              placeholder="e.g. 100M, 2.5k, 1B"
+              class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+              [class.border-red-400]="multiplier() === null"
+            />
+            <span
+              class="text-xs"
+              [class.text-gray-400]="multiplier() !== null"
+              [class.text-red-500]="multiplier() === null"
+            >
+              {{
+                multiplier() === null ? 'Use a number, optionally ending in k, M, B, or T' : '= ' + multiplierInWords()
+              }}
+            </span>
+          </div>
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Unit</label>
-          <select
-            (change)="onUnitChange($event)"
-            class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 bg-white"
+        <div class="mt-3">
+          <button
+            (click)="showSample.set(!showSample())"
+            class="text-blue-500 text-sm hover:underline cursor-pointer"
+            [attr.aria-expanded]="showSample()"
           >
-            <optgroup label="Decimal (1000)">
-              @for (u of decimalUnits; track u) {
-                <option [value]="u" [selected]="u === unit()">{{ u }}</option>
+            {{ showSample() ? '▾' : '▸' }} Measure a sample payload
+          </button>
+          @if (showSample()) {
+            <div class="mt-3 flex flex-col gap-2">
+              <textarea
+                rows="6"
+                [value]="payloadText()"
+                (input)="onPayloadChange($event)"
+                placeholder="Paste a sample record -- a JSON payload, CSV row, log line, etc. Its size replaces the Size field above."
+                class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono resize-y"
+              ></textarea>
+              @if (payloadActive()) {
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
+                  <span>
+                    {{ payloadBytesExact() }} bytes (UTF-8) · {{ payloadChars() }} characters
+                    @if (payloadBytes() !== payloadCharCount()) {
+                      <span class="text-gray-400">-- includes multi-byte characters</span>
+                    }
+                  </span>
+                  @if (minifiedBytes() !== null && minifiedBytes() !== payloadBytes()) {
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" [checked]="useMinified()" (change)="useMinified.set(!useMinified())" />
+                      Use minified JSON size ({{ minifiedBytesText() }})
+                    </label>
+                  }
+                  <button
+                    (click)="payloadText.set('')"
+                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors ml-auto"
+                  >
+                    Clear sample
+                  </button>
+                </div>
               }
-            </optgroup>
-            <optgroup label="Binary (1024)">
-              @for (u of binaryUnits; track u) {
-                <option [value]="u" [selected]="u === unit()">{{ u }}</option>
-              }
-            </optgroup>
-          </select>
-        </div>
-
-        <div class="flex flex-col gap-1 flex-1">
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">× How many</label>
-          <input
-            type="text"
-            inputmode="decimal"
-            [value]="multiplierText()"
-            (input)="onMultiplierChange($event)"
-            placeholder="e.g. 100M, 2.5k, 1B"
-            class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
-            [class.border-red-400]="multiplier() === null"
-          />
-          <span
-            class="text-xs"
-            [class.text-gray-400]="multiplier() !== null"
-            [class.text-red-500]="multiplier() === null"
-          >
-            {{
-              multiplier() === null ? 'Use a number, optionally ending in k, M, B, or T' : '= ' + multiplierInWords()
-            }}
-          </span>
+            </div>
+          }
         </div>
       </div>
 
@@ -223,6 +300,27 @@ interface SizeRow {
           <p class="text-sm text-gray-400">Enter a size and how many to see the total.</p>
         }
       </div>
+
+      @if (recordBytes() !== null) {
+        <div>
+          <h3 class="text-gray-800 text-lg font-bold mb-1">At scale</h3>
+          <p class="text-gray-500 text-sm mb-3">
+            {{ recordBytesText() }} per record, from a thousand to a billion records. Click one to use it.
+          </p>
+          <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
+            @for (step of ladder(); track step.count) {
+              <button
+                (click)="pickCount(step.count)"
+                class="rounded-lg px-2 py-2 text-center cursor-pointer transition-shadow"
+                [class]="tileClass(step.color, multiplier() === step.count)"
+              >
+                <div class="text-xs opacity-70">× {{ step.label }}</div>
+                <div class="font-mono text-sm font-semibold whitespace-nowrap">{{ step.text }}</div>
+              </button>
+            }
+          </div>
+        </div>
+      }
 
       @if (result()) {
         <div>
@@ -357,11 +455,8 @@ interface SizeRow {
                     <td class="px-1 py-1">
                       <button
                         (click)="pickReference(r.size, r.unit, cell.count, answer)"
-                        class="w-full rounded-md px-2 py-2 font-mono whitespace-nowrap cursor-pointer transition-shadow hover:ring-2 hover:ring-blue-300 {{
-                          cell.color
-                        }}"
-                        [class.ring-2]="isActive(r.size, r.unit, cell.count)"
-                        [class.ring-blue-500]="isActive(r.size, r.unit, cell.count)"
+                        class="w-full rounded-md px-2 py-2 font-mono whitespace-nowrap cursor-pointer transition-shadow"
+                        [class]="tileClass(cell.color, isActive(r.size, r.unit, cell.count))"
                         [attr.aria-label]="r.label + ' times ' + cell.countLabel + ' = ' + cell.text"
                       >
                         {{ cell.text }}
@@ -391,6 +486,9 @@ export class ByteSizeCalculator {
   readonly copiedRow = signal<string | null>(null);
   readonly copiedAll = signal(false);
   readonly copiedHeadline = signal(false);
+  readonly showSample = signal(false);
+  readonly payloadText = signal('');
+  readonly useMinified = signal(false);
 
   readonly decimalUnits = DECIMAL_UNITS;
   readonly binaryUnits = BINARY_UNITS;
@@ -405,7 +503,7 @@ export class ByteSizeCalculator {
         count: c.count,
         countLabel: c.label,
         text: `${value} ${unit}`,
-        color: UNIT_COLORS[unit] ?? UNIT_COLORS['MB']
+        color: unitColor(unit)
       };
     })
   }));
@@ -416,14 +514,43 @@ export class ByteSizeCalculator {
     return m === null ? '' : multiplierWords(m);
   });
 
-  readonly totalBytes = computed<number | null>(() => {
+  readonly payloadActive = computed(() => this.payloadText().length > 0);
+  readonly payloadBytes = computed(() => UTF8.encode(this.payloadText()).length);
+  readonly payloadCharCount = computed(() => [...this.payloadText()].length);
+  readonly payloadBytesExact = computed(() => formatValue(this.payloadBytes()));
+  readonly payloadChars = computed(() => formatValue(this.payloadCharCount()));
+  readonly minifiedBytes = computed(() => (this.payloadActive() ? minifiedJsonBytes(this.payloadText()) : null));
+  readonly minifiedBytesText = computed(() => formatValue(this.minifiedBytes() ?? 0) + ' bytes');
+
+  // Bytes for one record -- from the pasted sample when there is one, otherwise size × unit
+  readonly recordBytes = computed<number | null>(() => {
+    if (this.payloadActive()) {
+      const minified = this.minifiedBytes();
+      return this.useMinified() && minified !== null ? minified : this.payloadBytes();
+    }
     const s = this.size();
+    if (s === null || s <= 0) return null;
+    return s * INPUT_UNIT_BYTES[this.unit()];
+  });
+  readonly recordBytesText = computed(() => humanizeText(this.recordBytes() ?? 0));
+  readonly recordBytesExact = computed(() => formatValue(this.recordBytes() ?? 0));
+
+  readonly totalBytes = computed<number | null>(() => {
+    const record = this.recordBytes();
     const m = this.multiplier();
-    if (s === null || m === null || s <= 0 || m <= 0) return null;
-    return s * INPUT_UNIT_BYTES[this.unit()] * m;
+    if (record === null || record <= 0 || m === null || m <= 0) return null;
+    return record * m;
   });
 
-  readonly isBinaryInput = computed(() => BINARY_UNITS.includes(this.unit()));
+  readonly ladder = computed(() => {
+    const record = this.recordBytes() ?? 0;
+    return SCALE_COUNTS.map((c) => {
+      const { value, unit } = humanize(record * c.count);
+      return { count: c.count, label: c.label, text: `${value} ${unit}`, color: unitColor(unit) };
+    });
+  });
+
+  readonly isBinaryInput = computed(() => !this.payloadActive() && BINARY_UNITS.includes(this.unit()));
 
   // Binary input always shows the binary column, since that is where the answer lives
   readonly binaryVisible = computed(() => this.showBinary() || this.isBinaryInput());
@@ -444,7 +571,9 @@ export class ByteSizeCalculator {
     const i = this.bestIndex();
     const label = this.isBinaryInput() ? SCALES[i].binary : SCALES[i].decimal;
     const m = this.multiplier()!;
-    const sizeText = `${formatValue(this.size()!)} ${this.unit()}`;
+    const sizeText = this.payloadActive()
+      ? `${this.recordBytesText()} sample`
+      : `${formatValue(this.size()!)} ${this.unit()}`;
 
     return {
       sentence: m === 1 ? `${sizeText} =` : `${sizeText} × ${multiplierWords(m)} =`,
@@ -464,15 +593,29 @@ export class ByteSizeCalculator {
     }));
   });
 
+  // Unit color plus a ring for the selected tile (a single [class] binding so stale classes never linger)
+  tileClass(color: string, active: boolean): string {
+    return `${color} ${active ? 'ring-2 ring-blue-500' : 'hover:ring-2 hover:ring-blue-300'}`;
+  }
+
   isActive(size: number, unit: InputUnit, count: number): boolean {
-    return this.size() === size && this.unit() === unit && this.multiplier() === count;
+    return !this.payloadActive() && this.size() === size && this.unit() === unit && this.multiplier() === count;
   }
 
   pickReference(size: number, unit: InputUnit, count: number, answer: HTMLElement): void {
     this.size.set(size);
     this.unit.set(unit);
     this.multiplierText.set(multiplierShorthand(count));
+    this.payloadText.set('');
     answer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  pickCount(count: number): void {
+    this.multiplierText.set(multiplierShorthand(count));
+  }
+
+  onPayloadChange(event: Event): void {
+    this.payloadText.set((event.target as HTMLTextAreaElement).value);
   }
 
   onSizeChange(event: Event): void {
