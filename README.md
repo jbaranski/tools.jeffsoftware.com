@@ -5,7 +5,7 @@ Simple web based software development utilities that help me with my day to day 
 All vibe coded... inspired by [tools.simonwillison.net](https://tools.simonwillison.net/).
 
 - [TPS Calculator](https://tools.jeffsoftware.com/tps) -- Calculate throughput per second, minute, hour, and day from a count and time window.
-- [Byte Size Calculator](https://tools.jeffsoftware.com/byte-size) -- Convert a size times a multiplier into bytes, KB, MB, GB, TB, and PB, with a quick reference table.
+- [Byte Size Calculator](https://tools.jeffsoftware.com/byte-size) -- Estimate storage from a record size or a pasted sample payload times a record count, from bytes to petabytes.
 - [Character Generator](https://tools.jeffsoftware.com/character-generator) -- Generate a random string with configurable length and character sets.
 - [Number Formatter](https://tools.jeffsoftware.com/number-formatter) -- Format a number with comma separators and convert it to English words.
 - [iCal Viewer + RFC 5545 (iCal spec) Validator](https://tools.jeffsoftware.com/ical-viewer) -- Paste .ics file content to view events in chronological order and validate against RFC 5545 (iCal spec).
