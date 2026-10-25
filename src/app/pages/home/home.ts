@@ -32,6 +32,12 @@ export class Home {
       route: '/tps'
     },
     {
+      name: 'Byte Size Calculator',
+      description:
+        'Estimate storage from a record size or a pasted sample payload times a record count, from bytes to petabytes.',
+      route: '/byte-size'
+    },
+    {
       name: 'Character Generator',
       description: 'Generate a random string with configurable length and character sets.',
       route: '/character-generator'
