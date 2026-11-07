@@ -42,6 +42,12 @@ export class Home {
       route: '/number-formatter'
     },
     {
+      name: 'Bayesian Experiments',
+      description:
+        "Work out the chance of the next pick given what you've already drawn, step by step, then check it with a simulation.",
+      route: '/bayes'
+    },
+    {
       name: 'iCal Viewer + RFC 5545 (iCal spec) Validator',
       description:
         'Paste .ics file content to view events in chronological order and validate against RFC 5545 (iCal spec).',

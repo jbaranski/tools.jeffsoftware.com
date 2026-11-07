@@ -14,6 +14,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/ical-viewer/ical-viewer').then((m) => m.ICalViewer)
   },
   {
+    path: 'bayes',
+    loadComponent: () => import('./pages/bayes/bayes').then((m) => m.BayesExperiments)
+  },
+  {
     path: 'mermaid-diagram',
     loadComponent: () => import('./pages/mermaid-diagram/mermaid-diagram').then((m) => m.MermaidDiagram)
   }
