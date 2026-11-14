@@ -65,18 +65,9 @@ function wrap(expr: string): string {
   return expr.includes(' ') ? `(${expr})` : expr;
 }
 
-// One item per character, or split on commas / spaces when present
+// Each ASCII letter or digit is one item; commas, spaces and everything else are ignored
 function parseItems(text: string): string[] {
-  const trimmed = text.trim();
-  if (!trimmed) return [];
-  if (trimmed.includes(',')) {
-    return trimmed
-      .split(',')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-  }
-  if (/\s/.test(trimmed)) return trimmed.split(/\s+/);
-  return [...trimmed];
+  return text.match(/[A-Za-z0-9]/g) ?? [];
 }
 
 function randomIndex(n: number): number {
@@ -108,9 +99,8 @@ function sampleExamples(draw: () => number[], total: bigint): number[][] {
 }
 
 function formatExample(items: string[], indexes: number[]): string {
-  const joiner = items.every((item) => [...item].length === 1) ? '' : ' ';
   const shown = indexes.slice(0, MAX_EXAMPLE_ITEMS).map((i) => items[i]);
-  return shown.join(joiner) + (indexes.length > MAX_EXAMPLE_ITEMS ? '…' : '');
+  return shown.join('') + (indexes.length > MAX_EXAMPLE_ITEMS ? '…' : '');
 }
 
 interface CountRow {
@@ -158,7 +148,7 @@ interface CountRow {
             type="text"
             [value]="optionsText()"
             (input)="onOptionsChange($event)"
-            placeholder="e.g. ABC, 0123456789, or red, green, blue"
+            placeholder="e.g. ABC or 0123456789 (letters and digits only)"
             class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
           />
         </div>
@@ -252,7 +242,7 @@ interface CountRow {
           type="text"
           [value]="itemsText()"
           (input)="onItemsChange($event)"
-          placeholder="e.g. ABC, 112233, or red, red, blue"
+          placeholder="e.g. AABC or 112233 (letters and digits only)"
           class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
         />
       </div>
