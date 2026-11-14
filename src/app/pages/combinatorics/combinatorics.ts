@@ -65,8 +65,15 @@ function wrap(expr: string): string {
   return expr.includes(' ') ? `(${expr})` : expr;
 }
 
-// Each ASCII letter or digit is one item; commas, spaces and everything else are ignored
+// With commas, each comma-separated value is one item, keeping only its ASCII letters and digits ("10, 21" -> 10, 21).
+// Without commas, each ASCII letter or digit is one item ("ABC" -> A, B, C). Everything else is ignored.
 function parseItems(text: string): string[] {
+  if (text.includes(',')) {
+    return text
+      .split(',')
+      .map((part) => part.replace(/[^A-Za-z0-9]/g, ''))
+      .filter((part) => part.length > 0);
+  }
   return text.match(/[A-Za-z0-9]/g) ?? [];
 }
 
@@ -100,7 +107,9 @@ function sampleExamples(draw: () => number[], total: bigint): number[][] {
 
 function formatExample(items: string[], indexes: number[]): string {
   const shown = indexes.slice(0, MAX_EXAMPLE_ITEMS).map((i) => items[i]);
-  return shown.join('') + (indexes.length > MAX_EXAMPLE_ITEMS ? '…' : '');
+  // Single characters read fine run together (AB); longer items need separating (10, 21)
+  const joiner = items.every((item) => item.length === 1) ? '' : ', ';
+  return shown.join(joiner) + (indexes.length > MAX_EXAMPLE_ITEMS ? '…' : '');
 }
 
 interface CountRow {
@@ -122,7 +131,8 @@ interface CountRow {
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Combinatorics Calculator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Count possibilities, with examples and the math worked out. Only letters and digits count as items.
+        Count possibilities, with examples and the math worked out. Type items as letters and digits (ABC), or separate
+        them with commas (10, 21).
       </p>
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Pick from options</h3>
@@ -150,7 +160,7 @@ interface CountRow {
             type="text"
             [value]="optionsText()"
             (input)="onOptionsChange($event)"
-            placeholder="e.g. ABC or 0123456789"
+            placeholder="e.g. ABC, or comma-separated like 10, 21, 35"
             class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono"
           />
         </div>
@@ -276,7 +286,7 @@ interface CountRow {
           type="text"
           [value]="itemsText()"
           (input)="onItemsChange($event)"
-          placeholder="e.g. AABC or 112233"
+          placeholder="e.g. AABC, or comma-separated like 10, 10, 21"
           class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono"
         />
       </div>
