@@ -108,7 +108,7 @@ function sampleExamples(draw: () => number[], total: bigint): number[][] {
 }
 
 function formatExample(items: string[], indexes: number[]): string {
-  const joiner = items.every((item) => [...item].length === 1) ? '' : ', ';
+  const joiner = items.every((item) => [...item].length === 1) ? '' : ' ';
   const shown = indexes.slice(0, MAX_EXAMPLE_ITEMS).map((i) => items[i]);
   return shown.join(joiner) + (indexes.length > MAX_EXAMPLE_ITEMS ? '…' : '');
 }
@@ -193,12 +193,12 @@ interface CountRow {
                   {{ display(row.value) }}
                 </td>
                 <td class="px-4 py-3 font-mono text-gray-500 text-xs hidden sm:table-cell">
-                  {{ row.examples.length > 0 ? row.examples.join('  ·  ') : '--' }}
+                  {{ row.examples.length > 0 ? row.examples.join(', ') : '--' }}
                 </td>
               </tr>
               <tr class="sm:hidden border-b border-gray-100 last:border-0 bg-gray-50">
                 <td colspan="3" class="px-4 pb-3 font-mono text-gray-500 text-xs">
-                  {{ row.examples.length > 0 ? row.examples.join('  ·  ') : '--' }}
+                  {{ row.examples.length > 0 ? row.examples.join(', ') : '--' }}
                 </td>
               </tr>
             }
@@ -281,7 +281,7 @@ interface CountRow {
                 <td class="px-4 py-3 font-mono font-semibold text-gray-800 whitespace-nowrap align-top">
                   {{ display(a.value) }}
                 </td>
-                <td class="px-4 py-3 font-mono text-gray-500 text-xs">{{ a.examples.join('  ·  ') }}</td>
+                <td class="px-4 py-3 font-mono text-gray-500 text-xs">{{ a.examples.join(', ') }}</td>
               </tr>
               <tr>
                 <td class="px-4 py-3 text-gray-500 align-top">
