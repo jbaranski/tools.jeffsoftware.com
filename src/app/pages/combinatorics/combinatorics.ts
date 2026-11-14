@@ -129,11 +129,7 @@ interface CountRow {
     <main class="mt-4 max-w-2xl">
       <a routerLink="/" class="text-blue-500 text-sm hover:underline mb-6 inline-block">← All tools</a>
 
-      <h2 class="text-gray-800 text-2xl font-bold mb-1">Combinatorics Calculator</h2>
-      <p class="text-gray-500 text-sm mb-6">
-        Count possibilities, with examples and the math worked out. Type items as letters and digits (ABC), or separate
-        them with commas (10, 21).
-      </p>
+      <h2 class="text-gray-800 text-2xl font-bold mb-6">Combinatorics Calculator</h2>
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Pick from options</h3>
       <p class="text-gray-500 text-sm mb-6">How many ways can you pick r items from n options?</p>
