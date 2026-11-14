@@ -176,7 +176,7 @@ interface CountRow {
                 <span class="flex items-center justify-between gap-2">
                   Examples
                   <button
-                    (click)="seed.set(seed() + 1)"
+                    (click)="pickSeed.set(pickSeed() + 1)"
                     class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
                   >
                     New examples
@@ -240,7 +240,7 @@ interface CountRow {
             Math
           </button>
           <button
-            (click)="seed.set(seed() + 1)"
+            (click)="pickSeed.set(pickSeed() + 1)"
             class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap sm:hidden"
           >
             New examples
@@ -301,7 +301,7 @@ interface CountRow {
                 <span class="flex items-center justify-between gap-2">
                   Examples
                   <button
-                    (click)="seed.set(seed() + 1)"
+                    (click)="arrangeSeed.set(arrangeSeed() + 1)"
                     class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
                   >
                     New examples
@@ -389,8 +389,9 @@ export class Combinatorics {
   readonly r = signal<number | null>(2);
   readonly optionsText = signal('ABC');
   readonly itemsText = signal('AABC');
-  // Bumped by "New examples" so the example computeds re-run
-  readonly seed = signal(0);
+  // Bumped by each section's "New examples" so only that section's examples re-run
+  readonly pickSeed = signal(0);
+  readonly arrangeSeed = signal(0);
   readonly showPickMath = signal(false);
   readonly showArrangeMath = signal(false);
 
@@ -399,7 +400,7 @@ export class Combinatorics {
   readonly itemCount = computed(() => parseItems(this.itemsText()).length);
 
   readonly rows = computed<CountRow[]>(() => {
-    this.seed();
+    this.pickSeed();
     const items = this.options();
     const n = items.length;
     const r = this.r();
@@ -458,7 +459,7 @@ export class Combinatorics {
 
   // n! divided by k! for each item that appears k times
   readonly arrangement = computed(() => {
-    this.seed();
+    this.arrangeSeed();
     const items = parseItems(this.itemsText());
     if (items.length === 0 || items.length > MAX_N) return null;
 
