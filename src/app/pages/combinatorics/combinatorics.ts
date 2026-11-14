@@ -132,7 +132,10 @@ interface CountRow {
       <h2 class="text-gray-800 text-2xl font-bold mb-6">Combinatorics Calculator</h2>
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Pick from options</h3>
-      <p class="text-gray-500 text-sm mb-6">How many ways can you pick r items from n options?</p>
+      <p class="text-gray-500 text-sm mb-6">
+        How many ways can you pick <strong class="text-gray-800">r</strong> items from
+        <strong class="text-gray-800">n</strong> options?
+      </p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <div class="flex flex-col gap-1 sm:w-28">
@@ -150,7 +153,7 @@ interface CountRow {
         </div>
         <div class="flex flex-col gap-1 flex-1">
           <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            From these options (n = {{ options().length }})
+            Options (n = {{ options().length }})
           </label>
           <input
             type="text"
@@ -274,7 +277,9 @@ interface CountRow {
       </div>
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Arrange items</h3>
-      <p class="text-gray-500 text-sm mb-6">How many different orders can these items go in?</p>
+      <p class="text-gray-500 text-sm mb-6">
+        How many different orders can <strong class="text-gray-800">n</strong> items go in?
+      </p>
 
       <div class="flex flex-col gap-1 mb-6">
         <label class="text-xs font-medium text-gray-500 uppercase tracking-wide"> Items (n = {{ itemCount() }}) </label>
