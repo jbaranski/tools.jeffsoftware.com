@@ -10,15 +10,15 @@ const UNITS: { label: string; name: string; bytes: number }[] = [
   { label: 'PB', name: 'Petabytes', bytes: 1e15 }
 ];
 
-const REFERENCE_SIZES: { label: string; bytes: number }[] = [
-  { label: '100 B', bytes: 100 },
-  { label: '1 KB', bytes: 1e3 },
-  { label: '10 KB', bytes: 1e4 },
-  { label: '100 KB', bytes: 1e5 },
-  { label: '1 MB', bytes: 1e6 }
-];
+// 1, 10 and 100 of each unit from B to TB
+const REFERENCE_SIZES: { label: string; bytes: number }[] = UNITS.slice(0, 5).flatMap((u) =>
+  [1, 10, 100].map((m) => ({ label: `${m} ${u.label}`, bytes: m * u.bytes }))
+);
 
 const REFERENCE_COUNTS: { label: string; count: number }[] = [
+  { label: '10', count: 10 },
+  { label: '100', count: 100 },
+  { label: '1K', count: 1e3 },
   { label: '10K', count: 1e4 },
   { label: '100K', count: 1e5 },
   { label: '1M', count: 1e6 },
@@ -60,9 +60,13 @@ function bestUnitIndex(bytes: number): number {
   return i;
 }
 
+// The quick reference goes past PB so its biggest cells stay short (100 ZB, not 100,000,000 PB)
+const REFERENCE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB'];
+
 function humanize(bytes: number): string {
-  const unit = UNITS[bestUnitIndex(bytes)];
-  return `${(bytes / unit.bytes).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${unit.label}`;
+  let i = 0;
+  while (i < REFERENCE_UNITS.length - 1 && bytes >= 1000 ** (i + 1)) i++;
+  return `${(bytes / 1000 ** i).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${REFERENCE_UNITS[i]}`;
 }
 
 // UTF-8 uses 1 byte up to U+007F, 2 up to U+07FF, 3 up to U+FFFF and 4 beyond
@@ -390,18 +394,18 @@ interface SizeRow {
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left px-4 py-3 font-semibold text-gray-600">Size</th>
+                <th class="text-left pl-3 pr-1 py-3 font-semibold text-gray-600 sticky left-0 bg-gray-50">Size</th>
                 @for (c of referenceCounts; track c.label) {
-                  <th class="text-right px-3 py-3 font-semibold text-gray-600">× {{ c.label }}</th>
+                  <th class="text-right px-2 py-3 font-semibold text-gray-600 whitespace-nowrap">× {{ c.label }}</th>
                 }
               </tr>
             </thead>
             <tbody>
               @for (r of referenceRows; track r.label) {
                 <tr class="border-b border-gray-100 last:border-0">
-                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ r.label }}</td>
+                  <td class="pl-3 pr-1 py-3 text-gray-600 whitespace-nowrap sticky left-0 bg-white">{{ r.label }}</td>
                   @for (cell of r.cells; track $index) {
-                    <td class="px-3 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
+                    <td class="px-2 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
                   }
                 </tr>
               }
