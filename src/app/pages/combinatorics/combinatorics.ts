@@ -122,9 +122,11 @@ interface CountRow {
 
       <h2 class="text-gray-800 text-2xl font-bold mb-1">Combinatorics Calculator</h2>
       <p class="text-gray-500 text-sm mb-6">
-        Pick some number of items from a set of options. See how many possibilities there are, depending on whether
-        order and repeats matter -- with examples and the math worked out.
+        Count possibilities, with examples and the math worked out. Only letters and digits count as items.
       </p>
+
+      <h3 class="text-gray-800 text-lg font-bold mb-1">Pick from options</h3>
+      <p class="text-gray-500 text-sm mb-6">How many ways can you pick r items from n options?</p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <div class="flex flex-col gap-1 sm:w-28">
@@ -148,8 +150,8 @@ interface CountRow {
             type="text"
             [value]="optionsText()"
             (input)="onOptionsChange($event)"
-            placeholder="e.g. ABC or 0123456789 (letters and digits only)"
-            class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+            placeholder="e.g. ABC or 0123456789"
+            class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono"
           />
         </div>
       </div>
@@ -161,17 +163,7 @@ interface CountRow {
               <th class="text-left px-4 py-3 font-semibold text-gray-600">Order matters</th>
               <th class="text-left px-4 py-3 font-semibold text-gray-600">Repeats allowed</th>
               <th class="text-right px-4 py-3 font-semibold text-gray-600">Possibilities</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">
-                <span class="flex items-center justify-between gap-2">
-                  Examples
-                  <button
-                    (click)="seed.set(seed() + 1)"
-                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
-                  >
-                    New examples
-                  </button>
-                </span>
-              </th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">Examples</th>
             </tr>
           </thead>
           <tbody>
@@ -183,12 +175,12 @@ interface CountRow {
                   {{ display(row.value) }}
                 </td>
                 <td class="px-4 py-3 font-mono text-gray-500 text-xs hidden sm:table-cell">
-                  {{ row.examples.length > 0 ? row.examples.join(', ') : '--' }}
+                  {{ row.examples.length > 0 ? list(row.examples) : '--' }}
                 </td>
               </tr>
               <tr class="sm:hidden border-b border-gray-100 last:border-0 bg-gray-50">
                 <td colspan="3" class="px-4 pb-3 font-mono text-gray-500 text-xs">
-                  {{ row.examples.length > 0 ? row.examples.join(', ') : '--' }}
+                  {{ row.examples.length > 0 ? list(row.examples) : '--' }}
                 </td>
               </tr>
             }
@@ -206,92 +198,133 @@ interface CountRow {
         </table>
       </div>
 
-      @if (rows().length > 0) {
-        <div class="overflow-x-auto rounded-xl border border-gray-200 mb-6">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Case</th>
-                <th class="text-left px-4 py-3 font-semibold text-gray-600">
-                  How it's solved (n = {{ options().length }}, r = {{ r() }})
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (row of rows(); track $index) {
-                <tr class="border-b border-gray-100 last:border-0">
-                  <td class="px-4 py-3 text-gray-500 whitespace-nowrap align-top">
-                    <div>Order: {{ row.order ? 'Yes' : 'No' }}</div>
-                    <div>Repeats: {{ row.repeats ? 'Yes' : 'No' }}</div>
-                  </td>
-                  <td class="px-4 py-3 font-mono text-xs text-gray-600">
-                    @for (step of row.work; track $index; let first = $first; let last = $last) {
-                      <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
-                    }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+      <div class="mb-6">
+        <div class="flex items-center justify-between gap-3">
+          <button
+            (click)="showPickMath.set(!showPickMath())"
+            class="text-blue-500 text-sm hover:underline cursor-pointer"
+            [attr.aria-expanded]="showPickMath()"
+          >
+            {{ showPickMath() ? '▾ Hide the math' : '▸ Show the math' }}
+          </button>
+          <button
+            (click)="seed.set(seed() + 1)"
+            class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
+          >
+            New examples
+          </button>
         </div>
-      }
+        @if (showPickMath() && rows().length > 0) {
+          <div class="overflow-x-auto rounded-xl border border-gray-200 mt-3">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                  <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Case</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-600">How it's solved</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of rows(); track $index) {
+                  <tr class="border-b border-gray-100 last:border-0">
+                    <td class="px-4 py-3 text-gray-500 whitespace-nowrap align-top">
+                      <div>Order: {{ row.order ? 'Yes' : 'No' }}</div>
+                      <div>Repeats: {{ row.repeats ? 'Yes' : 'No' }}</div>
+                      <div class="text-xs text-gray-400 font-mono mt-1">n = {{ options().length }}, r = {{ r() }}</div>
+                    </td>
+                    <td class="px-4 py-3 font-mono text-xs text-gray-600">
+                      @for (step of row.work; track $index; let first = $first; let last = $last) {
+                        <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <h3 class="text-gray-800 text-lg font-bold mb-1">Arrange items</h3>
+      <p class="text-gray-500 text-sm mb-6">How many different orders can these items go in?</p>
 
       <div class="flex flex-col gap-1 mb-6">
-        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Arrange these items</label>
+        <label class="text-xs font-medium text-gray-500 uppercase tracking-wide"> Items (n = {{ itemCount() }}) </label>
         <input
           type="text"
           [value]="itemsText()"
           (input)="onItemsChange($event)"
-          placeholder="e.g. AABC or 112233 (letters and digits only)"
-          class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+          placeholder="e.g. AABC or 112233"
+          class="px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono"
         />
       </div>
 
-      <div class="overflow-x-auto rounded-xl border border-gray-200">
+      <div class="overflow-x-auto rounded-xl border border-gray-200 mb-6">
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Different orders</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600">
-                <span class="flex items-center justify-between gap-2">
-                  Examples
-                  <button
-                    (click)="seed.set(seed() + 1)"
-                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
-                  >
-                    New examples
-                  </button>
-                </span>
-              </th>
+              <th class="text-right px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Possibilities</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600">Examples</th>
             </tr>
           </thead>
           <tbody>
-            @if (arrangement(); as a) {
-              <tr class="border-b border-gray-100">
-                <td class="px-4 py-3 font-mono font-semibold text-gray-800 whitespace-nowrap align-top">
+            <tr>
+              @if (arrangement(); as a) {
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800 whitespace-nowrap">
                   {{ display(a.value) }}
                 </td>
-                <td class="px-4 py-3 font-mono text-gray-500 text-xs">{{ a.examples.join(', ') }}</td>
-              </tr>
-              <tr>
-                <td class="px-4 py-3 text-gray-500 align-top">
-                  How it's solved
-                  <div class="text-xs text-gray-400 font-mono mt-1">{{ a.legend }}</div>
-                </td>
-                <td class="px-4 py-3 font-mono text-xs text-gray-600">
-                  @for (step of a.work; track $index; let first = $first; let last = $last) {
-                    <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
-                  }
-                </td>
-              </tr>
-            } @else {
-              <tr>
-                <td class="px-4 py-3 text-gray-300">--</td>
+                <td class="px-4 py-3 font-mono text-gray-500 text-xs">{{ list(a.examples) }}</td>
+              } @else {
+                <td class="px-4 py-3 text-right text-gray-300">--</td>
                 <td class="px-4 py-3"></td>
-              </tr>
-            }
+              }
+            </tr>
           </tbody>
         </table>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between gap-3">
+          <button
+            (click)="showArrangeMath.set(!showArrangeMath())"
+            class="text-blue-500 text-sm hover:underline cursor-pointer"
+            [attr.aria-expanded]="showArrangeMath()"
+          >
+            {{ showArrangeMath() ? '▾ Hide the math' : '▸ Show the math' }}
+          </button>
+          <button
+            (click)="seed.set(seed() + 1)"
+            class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
+          >
+            New examples
+          </button>
+        </div>
+        @if (showArrangeMath() && arrangement(); as a) {
+          <div class="overflow-x-auto rounded-xl border border-gray-200 mt-3">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200">
+                  <th class="text-left px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Case</th>
+                  <th class="text-left px-4 py-3 font-semibold text-gray-600">How it's solved</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="px-4 py-3 text-gray-500 whitespace-nowrap align-top">
+                    <div>{{ a.repeatedCount === 0 ? 'All different' : 'With repeats' }}</div>
+                    @for (line of a.legend; track $index) {
+                      <div class="text-xs text-gray-400 font-mono mt-1">{{ line }}</div>
+                    }
+                  </td>
+                  <td class="px-4 py-3 font-mono text-xs text-gray-600">
+                    @for (step of a.work; track $index; let first = $first; let last = $last) {
+                      <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                    }
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        }
       </div>
     </main>
   `
@@ -299,15 +332,20 @@ interface CountRow {
 export class Combinatorics {
   readonly maxN = MAX_N;
   readonly display = display;
+  // Each example in its own parentheses: (AB), (BA), (CC)
+  readonly list = (examples: string[]) => examples.map((e) => `(${e})`).join(', ');
   readonly emptyRows = Array(4).fill(null);
   readonly r = signal<number | null>(2);
   readonly optionsText = signal('ABC');
   readonly itemsText = signal('AABC');
   // Bumped by "New examples" so the example computeds re-run
   readonly seed = signal(0);
+  readonly showPickMath = signal(false);
+  readonly showArrangeMath = signal(false);
 
   // Duplicate options count once
   readonly options = computed(() => [...new Set(parseItems(this.optionsText()))]);
+  readonly itemCount = computed(() => parseItems(this.itemsText()).length);
 
   readonly rows = computed<CountRow[]>(() => {
     this.seed();
@@ -382,10 +420,7 @@ export class Combinatorics {
     const value = total / divisor;
 
     const n = items.length;
-    const legend =
-      repeated.length === 0
-        ? `n = ${n}, all different`
-        : `n = ${n}, ` + repeated.map(([item, k], i) => `k${subscript(i + 1)} = ${k} (${item})`).join(', ');
+    const legend = [`n = ${n}`, ...repeated.map(([item, k], i) => `k${subscript(i + 1)} = ${k} (${item} repeats)`)];
     const work =
       repeated.length === 0
         ? ['n!', `${n}!`, product(n, n), display(value)]
@@ -401,7 +436,13 @@ export class Combinatorics {
     const unique = [...counts.keys()];
     const indexes = items.map((item) => unique.indexOf(item));
     const shuffle = () => randomDistinct(indexes.length, indexes.length).map((i) => indexes[i]);
-    return { value, work, legend, examples: sampleExamples(shuffle, value).map((s) => formatExample(unique, s)) };
+    return {
+      value,
+      work,
+      legend,
+      repeatedCount: repeated.length,
+      examples: sampleExamples(shuffle, value).map((s) => formatExample(unique, s))
+    };
   });
 
   onRChange(event: Event): void {
