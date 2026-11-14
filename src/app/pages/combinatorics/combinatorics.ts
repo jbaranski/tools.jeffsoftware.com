@@ -163,7 +163,17 @@ interface CountRow {
               <th class="text-left px-4 py-3 font-semibold text-gray-600">Order matters</th>
               <th class="text-left px-4 py-3 font-semibold text-gray-600">Repeats allowed</th>
               <th class="text-right px-4 py-3 font-semibold text-gray-600">Possibilities</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">Examples</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">
+                <span class="flex items-center justify-between gap-2">
+                  Examples
+                  <button
+                    (click)="seed.set(seed() + 1)"
+                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
+                  >
+                    New examples
+                  </button>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -202,14 +212,27 @@ interface CountRow {
         <div class="flex items-center justify-between gap-3">
           <button
             (click)="showPickMath.set(!showPickMath())"
-            class="text-blue-500 text-sm hover:underline cursor-pointer"
+            class="flex items-center gap-1 text-blue-500 text-sm font-medium hover:underline cursor-pointer"
             [attr.aria-expanded]="showPickMath()"
           >
-            {{ showPickMath() ? '▾ Hide the math' : '▸ Show the math' }}
+            <svg
+              class="w-5 h-5 transition-transform"
+              [class.rotate-90]="showPickMath()"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Math
           </button>
           <button
             (click)="seed.set(seed() + 1)"
-            class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
+            class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap sm:hidden"
           >
             New examples
           </button>
@@ -263,7 +286,17 @@ interface CountRow {
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
               <th class="text-right px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">Possibilities</th>
-              <th class="text-left px-4 py-3 font-semibold text-gray-600">Examples</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-600">
+                <span class="flex items-center justify-between gap-2">
+                  Examples
+                  <button
+                    (click)="seed.set(seed() + 1)"
+                    class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
+                  >
+                    New examples
+                  </button>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -286,16 +319,23 @@ interface CountRow {
         <div class="flex items-center justify-between gap-3">
           <button
             (click)="showArrangeMath.set(!showArrangeMath())"
-            class="text-blue-500 text-sm hover:underline cursor-pointer"
+            class="flex items-center gap-1 text-blue-500 text-sm font-medium hover:underline cursor-pointer"
             [attr.aria-expanded]="showArrangeMath()"
           >
-            {{ showArrangeMath() ? '▾ Hide the math' : '▸ Show the math' }}
-          </button>
-          <button
-            (click)="seed.set(seed() + 1)"
-            class="px-2 py-1 border border-gray-300 hover:border-gray-400 text-gray-600 text-xs font-medium rounded cursor-pointer transition-colors whitespace-nowrap"
-          >
-            New examples
+            <svg
+              class="w-5 h-5 transition-transform"
+              [class.rotate-90]="showArrangeMath()"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Math
           </button>
         </div>
         @if (showArrangeMath() && arrangement(); as a) {
