@@ -391,8 +391,8 @@ interface CountRow {
                 <tr class="border-b border-gray-100 last:border-0">
                   <td class="px-4 py-3 text-gray-600">
                     {{ row.label }}
-                    @if (noRepeats(row.label)) {
-                      <span class="text-xs text-gray-400 ml-1">no repeats</span>
+                    @if (noteFor(row.label); as note) {
+                      <span class="text-xs text-gray-400 ml-1">{{ note }}</span>
                     }
                   </td>
                   <td class="px-4 py-3 text-right font-mono font-semibold text-gray-600 whitespace-nowrap">
@@ -411,8 +411,8 @@ interface CountRow {
                   <tr class="border-b border-gray-100 last:border-0">
                     <td class="px-4 py-3 text-gray-600">
                       {{ label }}
-                      @if (noRepeats(label)) {
-                        <span class="text-xs text-gray-400 ml-1">no repeats</span>
+                      @if (noteFor(label); as note) {
+                        <span class="text-xs text-gray-400 ml-1">{{ note }}</span>
                       }
                     </td>
                     <td class="px-4 py-3 text-right text-gray-300">--</td>
@@ -468,8 +468,8 @@ interface CountRow {
                       <td class="px-4 py-3 text-gray-500 whitespace-nowrap align-top">
                         <div>
                           {{ row.label }}
-                          @if (noRepeats(row.label)) {
-                            <span class="text-xs text-gray-400 ml-1">no repeats</span>
+                          @if (noteFor(row.label); as note) {
+                            <span class="text-xs text-gray-400 ml-1">{{ note }}</span>
                           }
                         </div>
                         @for (line of row.legend; track $index) {
@@ -504,8 +504,13 @@ export class Combinatorics {
   readonly optionsText = signal('ABC');
   readonly itemsText = signal('ABCD');
   readonly arrangeLabels = ['In a line', 'In a circle', 'Nothing in its original spot', 'Groups of any size'];
-  // These two are only worked out for items with no repeats
-  readonly noRepeats = (label: string) => label === 'In a circle' || label === 'Nothing in its original spot';
+  // Small gray note beside a row name: the constraint that row works under
+  readonly noteFor = (label: string): string | null =>
+    label === 'In a circle' || label === 'Nothing in its original spot'
+      ? 'no repeats'
+      : label === 'Groups of any size'
+        ? "order doesn't matter"
+        : null;
   // Bumped by each section's "New examples" so only that section's examples re-run
   readonly pickSeed = signal(0);
   readonly arrangeSeed = signal(0);
@@ -667,19 +672,40 @@ export class Combinatorics {
 
     // Groups of any size: each item is in or out (2^n); with repeats, take 0 to k copies of each (k + 1 choices)
     const subsetValue = ks.reduce((acc, k) => acc * BigInt(k + 1), 1n);
-    const subsetDraw = () => ks.flatMap((k, t) => Array(randomIndex(k + 1)).fill(t));
+    // One random group per size, so the examples show the full range from empty to everything
+    const sizes =
+      n + 1 <= EXAMPLE_COUNT
+        ? Array.from({ length: n + 1 }, (_, size) => size)
+        : [...new Set([0, Math.round(n / 4), Math.round(n / 2), Math.round((3 * n) / 4), n])];
+    const subsetExamples = sizes.map((size) =>
+      formatExample(
+        unique,
+        randomDistinct(n, size)
+          .map((i) => indexes[i])
+          .sort((a, b) => a - b)
+      )
+    );
+    const bySize = Array.from({ length: n + 1 }, (_, size) => size);
     const subsets: ArrangeRow = {
       label: 'Groups of any size',
       value: subsetValue,
-      examples: examples(subsetDraw, subsetValue),
+      examples: subsetExamples,
       legend: allDifferent
         ? [`n = ${n}`, 'each item in or out']
         : [`n = ${n}`, ...unique.map((item, i) => `k${subscript(i + 1)} = ${ks[i]} (${item})`)],
+      // 2^n is the sum of the group counts for every size: C(n, 0) + C(n, 1) + … + C(n, n)
       work: allDifferent
         ? [
-            '2^n',
+            'C(n, 0) + C(n, 1) + … + C(n, n)',
+            abbreviate(
+              bySize.map((size) => `C(${n}, ${size})`),
+              ' + '
+            ),
+            abbreviate(
+              bySize.map((size) => display(combinations(n, size))),
+              ' + '
+            ),
             `2^${n}`,
-            ...(n > 1 && n <= MAX_WRITTEN_TERMS ? [Array(n).fill(2).join(' × ')] : []),
             display(subsetValue)
           ]
         : [
