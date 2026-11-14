@@ -34,7 +34,7 @@ export class Home {
     {
       name: 'Byte Size Calculator',
       description:
-        'Estimate storage from a record size or a pasted sample payload times a record count, from bytes to petabytes.',
+        'See how much space n records take, from bytes to petabytes, and measure the size of a sample record.',
       route: '/byte-size'
     },
     {
