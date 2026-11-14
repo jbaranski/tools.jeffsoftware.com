@@ -133,8 +133,8 @@ interface CountRow {
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Pick from options</h3>
       <p class="text-gray-500 text-sm mb-6">
-        How many ways can you pick <strong class="text-gray-800">r</strong> items from
-        <strong class="text-gray-800">n</strong> options?
+        How many ways can you pick <strong class="text-gray-600">r</strong> items from
+        <strong class="text-gray-600">n</strong> options?
       </p>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
@@ -190,7 +190,7 @@ interface CountRow {
               <tr class="border-b border-gray-100 last:border-0">
                 <td class="px-4 py-3 text-gray-600">{{ row.order ? 'Yes' : 'No' }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ row.repeats ? 'Yes' : 'No' }}</td>
-                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800 whitespace-nowrap">
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-600 whitespace-nowrap">
                   {{ display(row.value) }}
                 </td>
                 <td class="px-4 py-3 font-mono text-gray-500 text-xs hidden sm:table-cell">
@@ -265,7 +265,7 @@ interface CountRow {
                     </td>
                     <td class="px-4 py-3 font-mono text-xs text-gray-600">
                       @for (step of row.work; track $index; let first = $first; let last = $last) {
-                        <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                        <div [class]="last ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
                       }
                     </td>
                   </tr>
@@ -278,7 +278,7 @@ interface CountRow {
 
       <h3 class="text-gray-800 text-lg font-bold mb-1">Arrange items</h3>
       <p class="text-gray-500 text-sm mb-6">
-        How many different orders can <strong class="text-gray-800">n</strong> items go in?
+        How many different orders can <strong class="text-gray-600">n</strong> items go in?
       </p>
 
       <div class="flex flex-col gap-1 mb-6">
@@ -313,7 +313,7 @@ interface CountRow {
           <tbody>
             <tr>
               @if (arrangement(); as a) {
-                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-800 whitespace-nowrap">
+                <td class="px-4 py-3 text-right font-mono font-semibold text-gray-600 whitespace-nowrap">
                   {{ display(a.value) }}
                 </td>
                 <td class="px-4 py-3 font-mono text-gray-500 text-xs">{{ list(a.examples) }}</td>
@@ -368,7 +368,7 @@ interface CountRow {
                   </td>
                   <td class="px-4 py-3 font-mono text-xs text-gray-600">
                     @for (step of a.work; track $index; let first = $first; let last = $last) {
-                      <div [class]="last ? 'font-semibold text-gray-800' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                      <div [class]="last ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
                     }
                   </td>
                 </tr>
