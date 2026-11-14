@@ -10,3 +10,4 @@ All vibe coded... inspired by [tools.simonwillison.net](https://tools.simonwilli
 - [Bayesian Experiments](https://tools.jeffsoftware.com/bayes) -- Work out the chance of the next pick given what you've already drawn, step by step, then check it with a simulation.
 - [iCal Viewer + RFC 5545 (iCal spec) Validator](https://tools.jeffsoftware.com/ical-viewer) -- Paste .ics file content to view events in chronological order and validate against RFC 5545 (iCal spec).
 - [Mermaid Diagram Viewer](https://tools.jeffsoftware.com/mermaid-diagram) -- Paste Mermaid diagram syntax to render it live, with pan and zoom on the canvas.
+- [Combinatorics Calculator](https://tools.jeffsoftware.com/combinatorics) -- Count the ways to pick r from n, with or without order and repeats, or to arrange a set of items.
