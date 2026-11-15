@@ -38,6 +38,11 @@ export class Home {
       route: '/byte-size'
     },
     {
+      name: 'Combinatorics Calculator',
+      description: 'Count the ways to pick r from n, with or without order and repeats, or to arrange a set of items.',
+      route: '/combinatorics'
+    },
+    {
       name: 'Character Generator',
       description: 'Generate a random string with configurable length and character sets.',
       route: '/character-generator'
@@ -57,11 +62,6 @@ export class Home {
       name: 'Mermaid Diagram Viewer',
       description: 'Paste Mermaid diagram syntax to render it live, with pan and zoom on the canvas.',
       route: '/mermaid-diagram'
-    },
-    {
-      name: 'Combinatorics Calculator',
-      description: 'Count the ways to pick r from n, with or without order and repeats, or to arrange a set of items.',
-      route: '/combinatorics'
     }
   ];
 }
