@@ -18,13 +18,7 @@ const REFERENCE_SIZES: { label: string; bytes: number }[] = UNITS.slice(0, 5).fl
 const REFERENCE_COUNTS: { label: string; count: number }[] = [
   { label: '10', count: 10 },
   { label: '100', count: 100 },
-  { label: '1K', count: 1e3 },
-  { label: '10K', count: 1e4 },
-  { label: '100K', count: 1e5 },
-  { label: '1M', count: 1e6 },
-  { label: '10M', count: 1e7 },
-  { label: '100M', count: 1e8 },
-  { label: '1B', count: 1e9 }
+  { label: '1K', count: 1e3 }
 ];
 
 const SHORTHAND: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 };
@@ -60,14 +54,12 @@ function bestUnitIndex(bytes: number): number {
   return i;
 }
 
-// The quick reference goes past PB so its biggest cells stay short (100 ZB, not 100,000,000 PB)
-const REFERENCE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB'];
-
 function humanize(bytes: number): string {
-  let i = 0;
-  while (i < REFERENCE_UNITS.length - 1 && bytes >= 1000 ** (i + 1)) i++;
-  return `${(bytes / 1000 ** i).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${REFERENCE_UNITS[i]}`;
+  const unit = UNITS[bestUnitIndex(bytes)];
+  return `${(bytes / unit.bytes).toLocaleString('en-US', { maximumSignificantDigits: 3 })} ${unit.label}`;
 }
+
+const SAMPLE_FORMULA = '1-byte chars × 1 + 2-byte chars × 2 + 3-byte chars × 3 + 4-byte chars × 4';
 
 // UTF-8 uses 1 byte up to U+007F, 2 up to U+07FF, 3 up to U+FFFF and 4 beyond
 function utf8Length(char: string): number {
@@ -208,7 +200,7 @@ interface SizeRow {
             </svg>
             Math
           </button>
-          @if (showTotalMath() && totalMath(); as math) {
+          @if (showTotalMath()) {
             <div class="overflow-x-auto rounded-xl border border-gray-200 mt-3">
               <table class="w-full text-sm">
                 <thead>
@@ -218,7 +210,7 @@ interface SizeRow {
                   </tr>
                 </thead>
                 <tbody>
-                  @for (row of math; track row.label) {
+                  @for (row of totalMath(); track row.label) {
                     <tr class="border-b border-gray-100 last:border-0">
                       <td class="px-4 py-3 text-gray-500 whitespace-nowrap align-top">
                         <div>{{ row.label }}</div>
@@ -228,7 +220,7 @@ interface SizeRow {
                       </td>
                       <td class="px-4 py-3 font-mono text-xs text-gray-600">
                         @for (step of row.work; track $index; let first = $first; let last = $last) {
-                          <div [class]="last ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                          <div [class]="last && !first ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
                         }
                       </td>
                     </tr>
@@ -334,7 +326,7 @@ interface SizeRow {
             </svg>
             Math
           </button>
-          @if (showSampleMath() && sample(); as s) {
+          @if (showSampleMath()) {
             <div class="overflow-x-auto rounded-xl border border-gray-200 mt-3">
               <table class="w-full text-sm">
                 <thead>
@@ -353,8 +345,8 @@ interface SizeRow {
                       <div class="text-xs text-gray-400 font-mono mt-1">emoji = 4 bytes</div>
                     </td>
                     <td class="px-4 py-3 font-mono text-xs text-gray-600">
-                      @for (step of s.work; track $index; let first = $first; let last = $last) {
-                        <div [class]="last ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
+                      @for (step of sampleWork(); track $index; let first = $first; let last = $last) {
+                        <div [class]="last && !first ? 'font-semibold' : ''">{{ first ? '' : '= ' }}{{ step }}</div>
                       }
                     </td>
                   </tr>
@@ -394,18 +386,18 @@ interface SizeRow {
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left pl-3 pr-1 py-3 font-semibold text-gray-600 sticky left-0 bg-gray-50">Size</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600">Size</th>
                 @for (c of referenceCounts; track c.label) {
-                  <th class="text-right px-2 py-3 font-semibold text-gray-600 whitespace-nowrap">× {{ c.label }}</th>
+                  <th class="text-right px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">× {{ c.label }}</th>
                 }
               </tr>
             </thead>
             <tbody>
               @for (r of referenceRows; track r.label) {
                 <tr class="border-b border-gray-100 last:border-0">
-                  <td class="pl-3 pr-1 py-3 text-gray-600 whitespace-nowrap sticky left-0 bg-white">{{ r.label }}</td>
+                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ r.label }}</td>
                   @for (cell of r.cells; track $index) {
-                    <td class="px-2 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
+                    <td class="px-4 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
                   }
                 </tr>
               }
@@ -456,10 +448,20 @@ export class ByteSizeCalculator {
     }));
   });
 
+  // Formula first, then the numbers plugged in step by step; just the formula until the inputs are valid
   readonly totalMath = computed(() => {
     const total = this.total();
-    if (total === null) return null;
     const unit = UNITS.find((u) => u.label === this.unit())!;
+    if (total === null) {
+      return [
+        {
+          label: 'Total in bytes',
+          legend: [`1 ${unit.label} = ${formatValue(unit.bytes)} B`],
+          work: ['record size × n']
+        },
+        { label: 'Most readable unit', legend: [], work: ['bytes ÷ bytes per unit'] }
+      ];
+    }
     const best = UNITS[bestUnitIndex(total)];
     const size = formatValue(this.size()!);
     const n = formatValue(this.records()!);
@@ -500,13 +502,16 @@ export class ByteSizeCalculator {
       chars: chars.length,
       bytes,
       work: [
-        '1-byte chars × 1 + 2-byte chars × 2 + 3-byte chars × 3 + 4-byte chars × 4',
+        SAMPLE_FORMULA,
         groups.map((g) => `${formatValue(g.count)} × ${g.size}`).join(' + '),
         groups.map((g) => formatValue(g.count * g.size)).join(' + '),
         `${formatValue(bytes)} bytes`
       ].filter((step, i, steps) => step !== steps[i - 1])
     };
   });
+
+  // Just the formula until there is a sample to measure
+  readonly sampleWork = computed(() => this.sample()?.work ?? [SAMPLE_FORMULA]);
 
   onSizeChange(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
