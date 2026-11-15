@@ -18,7 +18,13 @@ const REFERENCE_SIZES: { label: string; bytes: number }[] = UNITS.slice(0, 5).fl
 const REFERENCE_COUNTS: { label: string; count: number }[] = [
   { label: '10', count: 10 },
   { label: '100', count: 100 },
-  { label: '1K', count: 1e3 }
+  { label: '1K', count: 1e3 },
+  { label: '10K', count: 1e4 },
+  { label: '100K', count: 1e5 },
+  { label: '1M', count: 1e6 },
+  { label: '10M', count: 1e7 },
+  { label: '100M', count: 1e8 },
+  { label: '1B', count: 1e9 }
 ];
 
 const SHORTHAND: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 };
@@ -386,18 +392,18 @@ interface SizeRow {
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="text-left px-4 py-3 font-semibold text-gray-600">Size</th>
+                <th class="text-left px-4 py-3 font-semibold text-gray-600 sticky left-0 bg-gray-50">Size</th>
                 @for (c of referenceCounts; track c.label) {
-                  <th class="text-right px-4 py-3 font-semibold text-gray-600 whitespace-nowrap">× {{ c.label }}</th>
+                  <th class="text-right px-3 py-3 font-semibold text-gray-600 whitespace-nowrap">× {{ c.label }}</th>
                 }
               </tr>
             </thead>
             <tbody>
               @for (r of referenceRows; track r.label) {
                 <tr class="border-b border-gray-100 last:border-0">
-                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ r.label }}</td>
+                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap sticky left-0 bg-white">{{ r.label }}</td>
                   @for (cell of r.cells; track $index) {
-                    <td class="px-4 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
+                    <td class="px-3 py-3 text-right font-mono text-gray-500 whitespace-nowrap">{{ cell }}</td>
                   }
                 </tr>
               }
