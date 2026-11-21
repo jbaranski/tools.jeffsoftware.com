@@ -31,7 +31,7 @@
   "devDependencies": {
     "@angular/build": "^22.2.7",
     "@angular/cli": "^22.2.7",
-    "@angular/compiler-cli": "^22.2.6",
+    "@angular/compiler-cli": "^22.3.0",
     "@tailwindcss/postcss": "^4.3.5",
     "postcss": "^8.5.32",
     "prettier": "^3.10.1",
